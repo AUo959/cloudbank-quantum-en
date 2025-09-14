@@ -2,16 +2,17 @@ import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Atom, Upload, Key, Network, Database } from '@phosphor-icons/react'
+import { Atom, Upload, Key, Network, Database, Brain } from '@phosphor-icons/react'
 import { QuantumField } from '@/components/QuantumField'
 import { QuantumUploader } from '@/components/QuantumUploader'
 import { VectorKeyManager } from '@/components/VectorKeyManager'
 import { ProjectSpaceManager } from '@/components/ProjectSpaceManager'
 import { QuantumDatabase } from '@/components/QuantumDatabase'
+import { MetadataAnalyzer } from '@/components/MetadataAnalyzer'
 import { Toaster } from '@/components/ui/sonner'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('database')
+  const [activeTab, setActiveTab] = useState('analysis')
 
   return (
     <QuantumField className="min-h-screen bg-background">
@@ -84,7 +85,7 @@ function App() {
 
         {/* Main Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 quantum-field">
+          <TabsList className="grid w-full grid-cols-6 quantum-field">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Upload
@@ -92,6 +93,10 @@ function App() {
             <TabsTrigger value="database" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
               Database
+            </TabsTrigger>
+            <TabsTrigger value="analysis" className="flex items-center gap-2">
+              <Brain className="w-4 h-4" />
+              AI Analysis
             </TabsTrigger>
             <TabsTrigger value="vectors" className="flex items-center gap-2">
               <Key className="w-4 h-4" />
@@ -113,6 +118,10 @@ function App() {
 
           <TabsContent value="database" className="space-y-6">
             <QuantumDatabase />
+          </TabsContent>
+
+          <TabsContent value="analysis" className="space-y-6">
+            <MetadataAnalyzer />
           </TabsContent>
 
           <TabsContent value="vectors" className="space-y-6">
