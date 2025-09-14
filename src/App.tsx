@@ -1,40 +1,33 @@
 export default function App() {
   return (
-    <div style={{ padding: '20px', backgroundColor: '#1e293b', color: 'white', minHeight: '100vh' }}>
-      <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>Cloudbank</h1>
-      <p style={{ color: '#94a3b8' }}>Quantum File Repository</p>
-      
-      <div style={{ marginTop: '30px', backgroundColor: '#334155', padding: '20px', borderRadius: '8px' }}>
-        <h2>System Status</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px' }}>
-          <div style={{ backgroundColor: '#475569', padding: '16px', borderRadius: '6px' }}>
-            <div style={{ fontSize: '14px', color: '#94a3b8' }}>Status</div>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#10b981' }}>Active</div>
+    <div className="min-h-screen bg-slate-900 text-white p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold mb-4">Cloudbank</h1>
+        <p className="text-slate-400 mb-8">Quantum File Repository</p>
+        
+        <div className="bg-slate-800 rounded-lg p-6 mb-6">
+          <h2 className="text-2xl font-semibold mb-4">System Status</h2>
+          
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="bg-slate-700 rounded p-4">
+              <div className="text-sm text-slate-400">Status</div>
+              <div className="text-xl font-bold text-green-400">Online</div>
+            </div>
+            <div className="bg-slate-700 rounded p-4">
+              <div className="text-sm text-slate-400">Connections</div>
+              <div className="text-xl font-bold">72</div>
+            </div>
+            <div className="bg-slate-700 rounded p-4">
+              <div className="text-sm text-slate-400">Vector Keys</div>
+              <div className="text-xl font-bold">12</div>
+            </div>
           </div>
-          <div style={{ backgroundColor: '#475569', padding: '16px', borderRadius: '6px' }}>
-            <div style={{ fontSize: '14px', color: '#94a3b8' }}>Connections</div>
-            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>72</div>
-          </div>
-          <div style={{ backgroundColor: '#475569', padding: '16px', borderRadius: '6px' }}>
-            <div style={{ fontSize: '14px', color: '#94a3b8' }}>Vector Keys</div>
-            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>12</div>
-          </div>
+          
+          <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded transition-colors">
+            Upload Files
+          </button>
         </div>
       </div>
-
-      <button 
-        style={{ 
-          marginTop: '20px', 
-          backgroundColor: '#3b82f6', 
-          color: 'white', 
-          padding: '12px 24px', 
-          border: 'none', 
-          borderRadius: '6px',
-          cursor: 'pointer'
-        }}
-      >
-        Upload Files
-      </button>
     </div>
   )
 }
