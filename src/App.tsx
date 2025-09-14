@@ -3,24 +3,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Atom, Upload, Key, Network, Database, Brain, Activity, Eye, Cube } from '@phosphor-icons/react'
-import { Toaster } from '@/components/ui/sonner'
+import { Atom, Upload, Key, Database, Brain } from '@phosphor-icons/react'
 
 function App() {
   const [activeTab, setActiveTab] = useState('upload')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
-            <Atom className="w-12 h-12 text-purple-400 animate-pulse" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+            <Atom className="w-12 h-12 text-primary" />
+            <h1 className="text-4xl font-bold text-foreground">
               Cloudbank
             </h1>
           </div>
-          <p className="text-xl text-purple-200 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Quantum file repository system enabling seamless interoperability between AI agents 
             through symbolic vector chains and observer state protocols
           </p>
@@ -38,10 +37,10 @@ function App() {
         </div>
 
         {/* System Status */}
-        <Card className="bg-slate-800/50 border-purple-500/30 backdrop-blur-sm">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-purple-200">
-              <Database className="w-5 h-5 text-purple-400" />
+            <CardTitle className="flex items-center gap-2">
+              <Database className="w-5 h-5" />
               Quantum System Status
             </CardTitle>
             <CardDescription>
@@ -51,27 +50,19 @@ function App() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center space-y-1">
-                <p className="text-2xl font-bold text-accent">
-                  {Math.floor(Math.random() * 100)}%
-                </p>
+                <p className="text-2xl font-bold text-primary">85%</p>
                 <p className="text-xs text-muted-foreground">Quantum Coherence</p>
               </div>
               <div className="text-center space-y-1">
-                <p className="text-2xl font-bold text-primary">
-                  {Math.floor(Math.random() * 50) + 50}
-                </p>
+                <p className="text-2xl font-bold text-secondary">72</p>
                 <p className="text-xs text-muted-foreground">Active Entanglements</p>
               </div>
               <div className="text-center space-y-1">
-                <p className="text-2xl font-bold text-secondary">
-                  {Math.floor(Math.random() * 10) + 5}
-                </p>
+                <p className="text-2xl font-bold text-accent">12</p>
                 <p className="text-xs text-muted-foreground">Vector Chains</p>
               </div>
               <div className="text-center space-y-1">
-                <p className="text-2xl font-bold text-ring">
-                  Online
-                </p>
+                <p className="text-2xl font-bold text-ring">Online</p>
                 <p className="text-xs text-muted-foreground">Observer State</p>
               </div>
             </div>
@@ -174,8 +165,6 @@ function App() {
           </div>
         </div>
       </div>
-
-      <Toaster />
     </div>
   )
 }
