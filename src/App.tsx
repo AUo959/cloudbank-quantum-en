@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Atom, Upload, Key, Network, Database, Brain, Activity, Eye } from '@phosphor-icons/react'
+import { Atom, Upload, Key, Network, Database, Brain, Activity, Eye, Cube } from '@phosphor-icons/react'
 import { QuantumField } from '@/components/QuantumField'
 import { QuantumUploader } from '@/components/QuantumUploader'
 import { VectorKeyManager } from '@/components/VectorKeyManager'
@@ -10,6 +10,7 @@ import { ProjectSpaceManager } from '@/components/ProjectSpaceManager'
 import { QuantumDatabase } from '@/components/QuantumDatabase'
 import { MetadataAnalyzer } from '@/components/MetadataAnalyzer'
 import { QuantumNetworkVisualization } from '@/components/QuantumNetworkVisualization'
+import { Quantum3DVisualization } from '@/components/Quantum3DVisualization'
 import { VisualFileBrowser } from '@/components/VisualFileBrowser'
 import { RealTimeAnalyticsDashboard } from '@/components/RealTimeAnalyticsDashboard'
 import { Toaster } from '@/components/ui/sonner'
@@ -88,7 +89,7 @@ function App() {
 
         {/* Main Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 quantum-field">
+          <TabsList className="grid w-full grid-cols-9 quantum-field">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Upload
@@ -115,7 +116,11 @@ function App() {
             </TabsTrigger>
             <TabsTrigger value="network" className="flex items-center gap-2">
               <Atom className="w-4 h-4" />
-              Network
+              Network 2D
+            </TabsTrigger>
+            <TabsTrigger value="network3d" className="flex items-center gap-2">
+              <Cube className="w-4 h-4" />
+              Network 3D
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <Activity className="w-4 h-4" />
@@ -149,6 +154,10 @@ function App() {
 
           <TabsContent value="network" className="space-y-6">
             <QuantumNetworkVisualization />
+          </TabsContent>
+
+          <TabsContent value="network3d" className="space-y-6">
+            <Quantum3DVisualization />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
