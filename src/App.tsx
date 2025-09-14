@@ -2,55 +2,46 @@ import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Atom, Upload, Key, Network, Database, Brain, Activity, Eye, Cube } from '@phosphor-icons/react'
-import { QuantumField } from '@/components/QuantumField'
-import { QuantumUploader } from '@/components/QuantumUploader'
-import { VectorKeyManager } from '@/components/VectorKeyManager'
-import { ProjectSpaceManager } from '@/components/ProjectSpaceManager'
-import { QuantumDatabase } from '@/components/QuantumDatabase'
-import { MetadataAnalyzer } from '@/components/MetadataAnalyzer'
-import { QuantumNetworkVisualization } from '@/components/QuantumNetworkVisualization'
-import { Quantum3DVisualization } from '@/components/Quantum3DVisualization'
-import { VisualFileBrowser } from '@/components/VisualFileBrowser'
-import { RealTimeAnalyticsDashboard } from '@/components/RealTimeAnalyticsDashboard'
 import { Toaster } from '@/components/ui/sonner'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('analysis')
+  const [activeTab, setActiveTab] = useState('upload')
 
   return (
-    <QuantumField className="min-h-screen bg-background" intensity="high">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
-            <Atom className="w-12 h-12 text-accent quantum-pulse" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-accent via-primary to-secondary bg-clip-text text-transparent">
+            <Atom className="w-12 h-12 text-purple-400 animate-pulse" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
               Cloudbank
             </h1>
           </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-purple-200 max-w-2xl mx-auto">
             Quantum file repository system enabling seamless interoperability between AI agents 
             through symbolic vector chains and observer state protocols
           </p>
           <div className="flex items-center justify-center gap-2">
-            <Badge variant="outline" className="quantum-shimmer">
+            <Badge variant="outline">
               Quantum Computing Enabled
             </Badge>
-            <Badge variant="outline" className="quantum-shimmer">
+            <Badge variant="outline">
               Vector Chain Protocol
             </Badge>
-            <Badge variant="outline" className="quantum-shimmer">
+            <Badge variant="outline">
               Cross-Agent Compatible
             </Badge>
           </div>
         </div>
 
         {/* System Status */}
-        <Card className="quantum-field">
+        <Card className="bg-slate-800/50 border-purple-500/30 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="w-5 h-5 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-purple-200">
+              <Database className="w-5 h-5 text-purple-400" />
               Quantum System Status
             </CardTitle>
             <CardDescription>
@@ -60,25 +51,25 @@ function App() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center space-y-1">
-                <p className="text-2xl font-bold text-accent quantum-pulse">
+                <p className="text-2xl font-bold text-accent">
                   {Math.floor(Math.random() * 100)}%
                 </p>
                 <p className="text-xs text-muted-foreground">Quantum Coherence</p>
               </div>
               <div className="text-center space-y-1">
-                <p className="text-2xl font-bold text-primary quantum-pulse">
+                <p className="text-2xl font-bold text-primary">
                   {Math.floor(Math.random() * 50) + 50}
                 </p>
                 <p className="text-xs text-muted-foreground">Active Entanglements</p>
               </div>
               <div className="text-center space-y-1">
-                <p className="text-2xl font-bold text-secondary quantum-pulse">
+                <p className="text-2xl font-bold text-secondary">
                   {Math.floor(Math.random() * 10) + 5}
                 </p>
                 <p className="text-xs text-muted-foreground">Vector Chains</p>
               </div>
               <div className="text-center space-y-1">
-                <p className="text-2xl font-bold text-ring quantum-pulse">
+                <p className="text-2xl font-bold text-ring">
                   Online
                 </p>
                 <p className="text-xs text-muted-foreground">Observer State</p>
@@ -89,7 +80,7 @@ function App() {
 
         {/* Main Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 quantum-field">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Upload
@@ -106,62 +97,68 @@ function App() {
               <Key className="w-4 h-4" />
               Vector Keys
             </TabsTrigger>
-            <TabsTrigger value="spaces" className="flex items-center gap-2">
-              <Network className="w-4 h-4" />
-              Project Spaces
-            </TabsTrigger>
-            <TabsTrigger value="browser" className="flex items-center gap-2">
-              <Eye className="w-4 h-4" />
-              File Browser
-            </TabsTrigger>
-            <TabsTrigger value="network" className="flex items-center gap-2">
-              <Atom className="w-4 h-4" />
-              Network 2D
-            </TabsTrigger>
-            <TabsTrigger value="network3d" className="flex items-center gap-2">
-              <Cube className="w-4 h-4" />
-              Network 3D
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <Activity className="w-4 h-4" />
-              Analytics
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="upload" className="space-y-6">
-            <QuantumUploader />
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Files</CardTitle>
+                <CardDescription>
+                  Upload files to the quantum repository system
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                  <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">Drag and drop files here or click to browse</p>
+                  <Button>
+                    Choose Files
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="database" className="space-y-6">
-            <QuantumDatabase />
+            <Card>
+              <CardHeader>
+                <CardTitle>Quantum Database</CardTitle>
+                <CardDescription>
+                  Manage your quantum file database
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Database interface will be loaded here.</p>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="analysis" className="space-y-6">
-            <MetadataAnalyzer />
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Analysis</CardTitle>
+                <CardDescription>
+                  Advanced AI-powered metadata analysis
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">AI analysis tools will be loaded here.</p>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="vectors" className="space-y-6">
-            <VectorKeyManager />
-          </TabsContent>
-
-          <TabsContent value="spaces" className="space-y-6">
-            <ProjectSpaceManager />
-          </TabsContent>
-
-          <TabsContent value="browser" className="space-y-6">
-            <VisualFileBrowser />
-          </TabsContent>
-
-          <TabsContent value="network" className="space-y-6">
-            <QuantumNetworkVisualization />
-          </TabsContent>
-
-          <TabsContent value="network3d" className="space-y-6">
-            <Quantum3DVisualization />
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <RealTimeAnalyticsDashboard />
+            <Card>
+              <CardHeader>
+                <CardTitle>Vector Key Manager</CardTitle>
+                <CardDescription>
+                  Generate and manage quantum vector keys
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Vector key management interface will be loaded here.</p>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
@@ -179,7 +176,7 @@ function App() {
       </div>
 
       <Toaster />
-    </QuantumField>
+    </div>
   )
 }
 
