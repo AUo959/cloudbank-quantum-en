@@ -18,6 +18,17 @@ interface QuantumFile {
   vectorChain: string
   projectSpace: string
   parsedStructure?: any
+  metadata?: {
+    checksum: string
+    tags: string[]
+    description: string
+    accessedBy: string[]
+    lastAccessed: string
+    compressionRatio?: number
+    extractedFiles?: string[]
+    aiAnalyzed?: boolean
+    relatedFiles?: string[]
+  }
 }
 
 export function QuantumUploader() {
@@ -66,6 +77,15 @@ export function QuantumUploader() {
         complexity: Math.floor(Math.random() * 100),
         quantumSignature: Math.random().toString(36).substr(2, 16),
         entanglements: Math.floor(Math.random() * 5)
+      },
+      metadata: {
+        checksum: `sha256_${Math.random().toString(36).substr(2, 16)}`,
+        tags: [file.type.split('/')[0]],
+        description: `Quantum processed ${file.type} file`,
+        accessedBy: [],
+        lastAccessed: new Date().toISOString(),
+        aiAnalyzed: Math.random() > 0.5,
+        relatedFiles: []
       }
     }
 

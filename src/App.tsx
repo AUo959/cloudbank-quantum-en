@@ -7,10 +7,11 @@ import { QuantumField } from '@/components/QuantumField'
 import { QuantumUploader } from '@/components/QuantumUploader'
 import { VectorKeyManager } from '@/components/VectorKeyManager'
 import { ProjectSpaceManager } from '@/components/ProjectSpaceManager'
+import { QuantumDatabase } from '@/components/QuantumDatabase'
 import { Toaster } from '@/components/ui/sonner'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('upload')
+  const [activeTab, setActiveTab] = useState('database')
 
   return (
     <QuantumField className="min-h-screen bg-background">
@@ -83,10 +84,14 @@ function App() {
 
         {/* Main Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 quantum-field">
+          <TabsList className="grid w-full grid-cols-5 quantum-field">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Upload
+            </TabsTrigger>
+            <TabsTrigger value="database" className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              Database
             </TabsTrigger>
             <TabsTrigger value="vectors" className="flex items-center gap-2">
               <Key className="w-4 h-4" />
@@ -98,12 +103,16 @@ function App() {
             </TabsTrigger>
             <TabsTrigger value="browser" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
-              Quantum Browser
+              Browser
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="upload" className="space-y-6">
             <QuantumUploader />
+          </TabsContent>
+
+          <TabsContent value="database" className="space-y-6">
+            <QuantumDatabase />
           </TabsContent>
 
           <TabsContent value="vectors" className="space-y-6">
@@ -115,28 +124,7 @@ function App() {
           </TabsContent>
 
           <TabsContent value="browser" className="space-y-6">
-            <Card className="quantum-field">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="w-5 h-5 text-accent" />
-                  Quantum File Browser
-                </CardTitle>
-                <CardDescription>
-                  Navigate files through quantum superposition states and observer protocols
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="py-16">
-                <div className="text-center space-y-4">
-                  <Database className="w-16 h-16 mx-auto text-muted-foreground opacity-50 quantum-pulse" />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Quantum Browser Coming Soon</h3>
-                    <p className="text-muted-foreground">
-                      Advanced file navigation through quantum superposition states will be available in the next quantum update.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <QuantumDatabase />
           </TabsContent>
         </Tabs>
 
