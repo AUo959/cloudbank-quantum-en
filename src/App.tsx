@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Atom, Upload, Key, Database, Brain } from '@phosphor-icons/react'
 
-function App() {
+export default function App() {
   const [activeTab, setActiveTab] = useState('upload')
 
   return (
@@ -23,14 +23,14 @@ function App() {
             Quantum file repository system enabling seamless interoperability between AI agents 
             through symbolic vector chains and observer state protocols
           </p>
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             <Badge variant="secondary" className="particle-float">
               Quantum Computing Enabled
             </Badge>
-            <Badge variant="secondary" className="particle-float" style={{animationDelay: '0.5s'}}>
+            <Badge variant="secondary" className="particle-float">
               Vector Chain Protocol
             </Badge>
-            <Badge variant="secondary" className="particle-float" style={{animationDelay: '1s'}}>
+            <Badge variant="secondary" className="particle-float">
               Cross-Agent Compatible
             </Badge>
           </div>
@@ -165,17 +165,15 @@ function App() {
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground space-y-2">
           <p>Powered by Quantum Computing • Vector Chain Protocol • Observer State Management</p>
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
             <span className="quantum-entanglement">Superposition Active</span>
             <span>•</span>
-            <span className="quantum-entanglement" style={{animationDelay: '0.5s'}}>Entanglement Stable</span>
+            <span className="quantum-entanglement">Entanglement Stable</span>
             <span>•</span>
-            <span className="quantum-entanglement" style={{animationDelay: '1s'}}>Cross-Agent Ready</span>
+            <span className="quantum-entanglement">Cross-Agent Ready</span>
           </div>
         </div>
       </div>
     </div>
   )
 }
-
-export default App
