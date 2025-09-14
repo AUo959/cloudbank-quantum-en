@@ -4,13 +4,14 @@
 /* Quantum-inspired animations */
 @keyframes quantum-pulse {
   0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  50% { opacity: 0.9; transform: scale(1.08); }
 }
 
 @keyframes particle-float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-10px) rotate(120deg); }
-  66% { transform: translateY(5px) rotate(240deg); }
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+  25% { transform: translateY(-15px) rotate(90deg); opacity: 0.8; }
+  50% { transform: translateY(-5px) rotate(180deg); opacity: 1; }
+  75% { transform: translateY(10px) rotate(270deg); opacity: 0.6; }
 }
 
 @keyframes quantum-shimmer {
@@ -19,48 +20,85 @@
 }
 
 @keyframes state-collapse {
-  0% { transform: scale(1.2) rotate(0deg); opacity: 0; }
-  50% { transform: scale(1.1) rotate(180deg); opacity: 0.7; }
+  0% { transform: scale(1.3) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1.15) rotate(180deg); opacity: 0.8; }
   100% { transform: scale(1) rotate(360deg); opacity: 1; }
 }
 
 @keyframes ai-analysis {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.1); }
-  100% { transform: rotate(360deg) scale(1); }
+  0% { transform: rotate(0deg) scale(1); filter: hue-rotate(0deg); }
+  33% { transform: rotate(120deg) scale(1.1); filter: hue-rotate(120deg); }
+  66% { transform: rotate(240deg) scale(0.9); filter: hue-rotate(240deg); }
+  100% { transform: rotate(360deg) scale(1); filter: hue-rotate(360deg); }
+}
+
+@keyframes quantum-entanglement {
+  0%, 100% { transform: translateX(0) scale(1); }
+  50% { transform: translateX(5px) scale(1.05); }
+}
+
+@keyframes neural-pulse {
+  0% { opacity: 0.5; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.5; transform: scale(0.8); }
+}
+
+@keyframes data-flow {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
 }
 
 .quantum-pulse {
-  animation: quantum-pulse 2s ease-in-out infinite;
+  animation: quantum-pulse 2.5s ease-in-out infinite;
 }
 
 .particle-float {
-  animation: particle-float 3s ease-in-out infinite;
+  animation: particle-float 4s ease-in-out infinite;
 }
 
 .quantum-shimmer {
   background: linear-gradient(
     90deg,
     transparent,
-    oklch(0.75 0.15 70 / 0.3),
+    oklch(0.75 0.15 70 / 0.4),
+    oklch(0.7 0.18 290 / 0.3),
     transparent
   );
   background-size: 200% 100%;
-  animation: quantum-shimmer 2s ease-in-out infinite;
+  animation: quantum-shimmer 3s ease-in-out infinite;
 }
 
 .state-collapse {
-  animation: state-collapse 0.6s ease-out forwards;
+  animation: state-collapse 0.8s ease-out forwards;
 }
 
 .ai-analysis {
-  animation: ai-analysis 3s ease-in-out infinite;
+  animation: ai-analysis 4s ease-in-out infinite;
 }
 
-/* Quantum particle background */
+.quantum-entanglement {
+  animation: quantum-entanglement 2s ease-in-out infinite;
+}
+
+.neural-pulse {
+  animation: neural-pulse 1.5s ease-in-out infinite;
+}
+
+.data-flow {
+  animation: data-flow 5s linear infinite;
+}
+
+/* Quantum particle background with enhanced effects */
 .quantum-field {
   position: relative;
   overflow: hidden;
+  background: linear-gradient(135deg, 
+    oklch(0.98 0.005 280) 0%,
+    oklch(0.99 0.003 290) 50%,
+    oklch(0.98 0.008 270) 100%
+  );
 }
 
 .quantum-field::before {
@@ -71,28 +109,67 @@
   right: 0;
   bottom: 0;
   background-image: 
-    radial-gradient(circle at 20% 80%, oklch(0.45 0.15 250 / 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, oklch(0.55 0.12 290 / 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, oklch(0.65 0.08 180 / 0.05) 0%, transparent 50%);
+    radial-gradient(circle at 20% 80%, oklch(0.45 0.15 250 / 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, oklch(0.55 0.12 290 / 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, oklch(0.65 0.08 180 / 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 60% 80%, oklch(0.6 0.1 320 / 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 90% 60%, oklch(0.7 0.05 240 / 0.06) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
+  animation: quantum-entanglement 8s ease-in-out infinite;
+}
+
+.quantum-field::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDIwIDAgTCAwIDAgMCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJva2xjaCgwLjcgMC4xNSAyOTAgLyAwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIiAvPjwvc3ZnPg==');
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .quantum-field > * {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
-/* AI-specific visual elements */
+/* AI-specific visual elements with enhanced effects */
 .ai-glow {
-  box-shadow: 0 0 20px oklch(0.7 0.15 280 / 0.3);
+  box-shadow: 
+    0 0 20px oklch(0.7 0.15 280 / 0.4),
+    0 0 40px oklch(0.7 0.15 280 / 0.2),
+    inset 0 0 20px oklch(0.7 0.15 280 / 0.1);
+  border: 1px solid oklch(0.7 0.15 280 / 0.3);
 }
 
 .metadata-highlight {
   background: linear-gradient(135deg, 
-    oklch(0.95 0.02 280 / 0.5) 0%, 
-    oklch(0.98 0.01 280 / 0.3) 100%);
-  border: 1px solid oklch(0.85 0.05 280 / 0.2);
+    oklch(0.95 0.02 280 / 0.7) 0%, 
+    oklch(0.98 0.01 280 / 0.4) 50%,
+    oklch(0.96 0.015 290 / 0.6) 100%);
+  border: 1px solid oklch(0.85 0.05 280 / 0.3);
+  backdrop-filter: blur(8px);
+}
+
+.neural-network {
+  background: radial-gradient(ellipse at center,
+    oklch(0.7 0.15 280 / 0.1) 0%,
+    oklch(0.6 0.18 290 / 0.05) 50%,
+    transparent 100%);
+}
+
+.quantum-interference {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    oklch(0.7 0.15 290 / 0.1) 2px,
+    oklch(0.7 0.15 290 / 0.1) 4px
+  );
 }
 
 /* Custom scrollbar for quantum feel */

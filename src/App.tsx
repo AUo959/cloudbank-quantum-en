@@ -2,20 +2,23 @@ import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Atom, Upload, Key, Network, Database, Brain } from '@phosphor-icons/react'
+import { Atom, Upload, Key, Network, Database, Brain, Activity, Eye } from '@phosphor-icons/react'
 import { QuantumField } from '@/components/QuantumField'
 import { QuantumUploader } from '@/components/QuantumUploader'
 import { VectorKeyManager } from '@/components/VectorKeyManager'
 import { ProjectSpaceManager } from '@/components/ProjectSpaceManager'
 import { QuantumDatabase } from '@/components/QuantumDatabase'
 import { MetadataAnalyzer } from '@/components/MetadataAnalyzer'
+import { QuantumNetworkVisualization } from '@/components/QuantumNetworkVisualization'
+import { VisualFileBrowser } from '@/components/VisualFileBrowser'
+import { RealTimeAnalyticsDashboard } from '@/components/RealTimeAnalyticsDashboard'
 import { Toaster } from '@/components/ui/sonner'
 
 function App() {
   const [activeTab, setActiveTab] = useState('analysis')
 
   return (
-    <QuantumField className="min-h-screen bg-background">
+    <QuantumField className="min-h-screen bg-background" intensity="high">
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
@@ -85,7 +88,7 @@ function App() {
 
         {/* Main Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 quantum-field">
+          <TabsList className="grid w-full grid-cols-8 quantum-field">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Upload
@@ -107,8 +110,16 @@ function App() {
               Project Spaces
             </TabsTrigger>
             <TabsTrigger value="browser" className="flex items-center gap-2">
-              <Database className="w-4 h-4" />
-              Browser
+              <Eye className="w-4 h-4" />
+              File Browser
+            </TabsTrigger>
+            <TabsTrigger value="network" className="flex items-center gap-2">
+              <Atom className="w-4 h-4" />
+              Network
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Analytics
             </TabsTrigger>
           </TabsList>
 
@@ -133,7 +144,15 @@ function App() {
           </TabsContent>
 
           <TabsContent value="browser" className="space-y-6">
-            <QuantumDatabase />
+            <VisualFileBrowser />
+          </TabsContent>
+
+          <TabsContent value="network" className="space-y-6">
+            <QuantumNetworkVisualization />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <RealTimeAnalyticsDashboard />
           </TabsContent>
         </Tabs>
 
