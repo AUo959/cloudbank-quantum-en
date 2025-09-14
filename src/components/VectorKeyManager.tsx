@@ -7,9 +7,11 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Copy, Key, Eye, Lightning, Network, Shield, Atom, Download, QrCode } from '@phosphor-icons/react'
+import { Copy, Key, Eye, Lightning, Network, Shield, Atom, Download, QrCode, Share } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
+import { QuantumQRShare } from '@/components/QuantumQRShare'
+import { QuantumQRScanner } from '@/components/QuantumQRScanner'
 
 interface VectorKey {
   id: string
@@ -188,7 +190,7 @@ export function VectorKeyManager() {
 
   return (
     <Tabs defaultValue="generate" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-2 quantum-field">
+      <TabsList className="grid w-full grid-cols-4 quantum-field">
         <TabsTrigger value="generate" className="flex items-center gap-2">
           <Lightning className="w-4 h-4" />
           Generate Keys
@@ -196,6 +198,14 @@ export function VectorKeyManager() {
         <TabsTrigger value="manage" className="flex items-center gap-2">
           <Shield className="w-4 h-4" />
           Manage Keys
+        </TabsTrigger>
+        <TabsTrigger value="qr-share" className="flex items-center gap-2">
+          <QrCode className="w-4 h-4" />
+          QR Sharing
+        </TabsTrigger>
+        <TabsTrigger value="qr-import" className="flex items-center gap-2">
+          <QrCode className="w-4 h-4" />
+          QR Import
         </TabsTrigger>
       </TabsList>
 
@@ -415,6 +425,15 @@ export function VectorKeyManager() {
                             >
                               <Download className="w-4 h-4" />
                             </Button>
+                            <QuantumQRShare vectorKey={vectorKey}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="quantum-shimmer"
+                              >
+                                <QrCode className="w-4 h-4" />
+                              </Button>
+                            </QuantumQRShare>
                           </div>
                         </div>
 
@@ -456,6 +475,119 @@ export function VectorKeyManager() {
             )}
           </CardContent>
         </Card>
+      </TabsContent>
+
+      <TabsContent value="qr-share" className="space-y-6">
+        <Card className="quantum-field">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-accent" />
+              Quantum Key QR Sharing Hub
+            </CardTitle>
+            <CardDescription>
+              Generate and share quantum vector keys through QR codes for seamless cross-agent integration
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {keys.length > 0 ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {keys.filter(isKeyActive).map((vectorKey) => (
+                    <Card key={vectorKey.id} className="state-collapse">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-1">
+                              <h4 className="font-medium">{vectorKey.name}</h4>
+                              <div className="flex gap-1">
+                                <Badge variant={getPermissionColor(vectorKey.permissions) as any} className="text-xs">
+                                  {vectorKey.permissions}
+                                </Badge>
+                                <div className={`px-1.5 py-0.5 rounded text-xs font-medium ${getQuantumStrengthColor(vectorKey.quantumStrength)}`}>
+                                  {vectorKey.quantumStrength}
+                                </div>
+                              </div>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {vectorKey.observerState}
+                            </Badge>
+                          </div>
+                          
+                          <div className="text-xs text-muted-foreground space-y-1">
+                            <p>Agents: {vectorKey.allowedAgents.includes('*') ? 'All' : vectorKey.allowedAgents.join(', ')}</p>
+                            <p>Access Count: {vectorKey.accessCount}</p>
+                          </div>
+
+                          <div className="pt-2 border-t">
+                            <QuantumQRShare vectorKey={vectorKey}>
+                              <Button size="sm" className="w-full quantum-shimmer">
+                                <Share className="w-4 h-4 mr-2" />
+                                Generate QR Code
+                              </Button>
+                            </QuantumQRShare>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                {keys.filter(isKeyActive).length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <QrCode className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <h3 className="text-lg font-semibold mb-2">No Active Keys for Sharing</h3>
+                    <p className="text-sm">Generate an active quantum key to enable QR code sharing</p>
+                  </div>
+                )}
+
+                {/* QR Sharing Instructions */}
+                <Card className="border-accent/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Atom className="w-4 h-4 text-accent" />
+                      QR Code Integration Guide
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-medium mb-2">For AI Agents</h4>
+                        <ul className="text-xs text-muted-foreground space-y-1">
+                          <li>• Scan QR code with agent's camera/scanner</li>
+                          <li>• Automatic key import with permissions</li>
+                          <li>• Quantum entanglement verification</li>
+                          <li>• Instant access to project files</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-2">For Developers</h4>
+                        <ul className="text-xs text-muted-foreground space-y-1">
+                          <li>• Parse JSON payload from QR code</li>
+                          <li>• Validate quantum signature</li>
+                          <li>• Integrate with custom endpoints</li>
+                          <li>• Cross-platform compatibility</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t text-xs text-muted-foreground">
+                      <p><strong>Security:</strong> All QR codes include quantum signatures and can be revoked instantly through the observer state protocol.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Network className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-semibold mb-2">No Vector Keys Available</h3>
+                <p className="text-sm">Create your first quantum access key to start sharing via QR codes</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="qr-import" className="space-y-6">
+        <QuantumQRScanner />
       </TabsContent>
     </Tabs>
   )
