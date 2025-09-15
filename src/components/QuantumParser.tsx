@@ -306,7 +306,7 @@ export function QuantumParser() {
     ]
 
     try {
-      let allParsedFiles: ParsedFile[] = []
+  const allParsedFiles: ParsedFile[] = []
 
       for (let i = 0; i < stages.length; i++) {
         setProcessingStage(stages[i])
