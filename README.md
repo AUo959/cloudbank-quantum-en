@@ -42,3 +42,17 @@ npm run preview
 ```
 
 Use `PREVIEW_PORT=yyyy npm run preview` to override.
+
+## Git Workflow Helpers
+
+- Enable local git hooks:
+
+```bash
+bash scripts/setup-githooks.sh
+```
+
+This installs a `pre-push` hook that prevents pushing when your branch is behind or diverged. It fetches the remote ref and suggests the correct rebase command.
+
+- Auto-merge PRs targeting `main`:
+  - Add the label `automerge` to the PR.
+  - The workflow `.github/workflows/enable-automerge.yml` will enable GitHub’s auto-merge (squash) for that PR.
