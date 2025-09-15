@@ -56,3 +56,5 @@ This installs a `pre-push` hook that prevents pushing when your branch is behind
 - Auto-merge PRs targeting `main`:
   - Add the label `automerge` to the PR.
   - The workflow `.github/workflows/enable-automerge.yml` will enable GitHub’s auto-merge (squash) for that PR.
+
+Note: PRs labeled `no-automerge` will be skipped by the auto-labeler.
