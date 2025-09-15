@@ -10,6 +10,9 @@ const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Set base path for GitHub Pages project pages when provided.
+  // In the Pages workflow we set BASE_PATH=/cloudbank-quantum-en/
+  base: process.env.BASE_PATH || '/',
   plugins: [
     react(),
     tailwindcss(),
