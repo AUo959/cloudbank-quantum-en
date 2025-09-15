@@ -9,28 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
-import { 
-  Database, 
-  MagnifyingGlass, 
-  Funnel, 
-  Eye, 
-  Download, 
-  Trash, 
-  FileText, 
-  Archive, 
-  Image, 
-  Code, 
-  Atom,
-  Network,
-  Key,
-  Calendar,
-  Users,
-  Activity,
-  ChartBar,
-  ArrowClockwise,
-  CloudArrowUp,
-  Lock
-} from '@phosphor-icons/react'
+import { Database, MagnifyingGlass, Eye, Download, Trash, FileText, Archive, Image, Code, Activity, ChartBar, CloudArrowUp, Network, Key, Lock, Atom, ArrowClockwise } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 import { QuantumField } from './QuantumField'

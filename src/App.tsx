@@ -9,7 +9,7 @@ import { Quantum3DVisualization } from '@/components/Quantum3DVisualization'
 import { QuantumUploader } from '@/components/QuantumUploader'
 import { KVDataBridge } from '@/components/KVDataBridge'
 import { useKV } from '@github/spark/hooks'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function App() {
   const [tab, setTab] = useState('dashboard')
@@ -18,11 +18,12 @@ export default function App() {
     el.dataset.appearance = el.dataset.appearance === 'dark' ? 'light' : 'dark'
   }
   const [, setFiles] = useKV<any[]>('quantum-files', [])
-  const [cloudFiles, setCloudFiles] = useKV<any[]>('cloudbank-files', [])
+  const [, setCloudFiles] = useKV<any[]>('cloudbank-files', [])
   const [, setMetrics] = useKV<any[]>('analytics-metrics', [])
   const [, setTasks] = useKV<any[]>('processing-tasks', [])
+  const [llmOnline, setLlmOnline] = useState<boolean>(false)
   const clearKV = () => { setFiles([]); setMetrics([]); setTasks([]) }
-  const openInDatabase = (id: string) => setTab('database')
+  const openInDatabase = (_id: string) => setTab('database')
   const deleteEverywhere = (id: string) => {
     setCloudFiles((cur = []) => cur.filter((f: any) => f.id !== id))
     setFiles((cur = []) => cur.filter((f: any) => f.id !== id))
@@ -31,6 +32,15 @@ export default function App() {
     setCloudFiles((cur = []) => cur.filter((f: any) => !ids.includes(f.id)))
     setFiles((cur = []) => cur.filter((f: any) => !ids.includes(f.id)))
   }
+  useEffect(() => {
+    const check = () => {
+      const spark = (window as any).spark
+      setLlmOnline(!!(spark && typeof spark.llm === 'function' && typeof spark.llmPrompt === 'function'))
+    }
+    check()
+    const id = setInterval(check, 3000)
+    return () => clearInterval(id)
+  }, [])
   return (
     <div className="min-h-screen bg-background text-foreground p-8 font-sans">
       <div className="max-w-[1200px] mx-auto">
@@ -57,6 +67,12 @@ export default function App() {
             <div className="bg-gradient-to-br from-background to-card p-6 rounded-xl text-center border">
               <div className="text-2xl font-bold text-cyan-400 mb-2">42</div>
               <div className="text-sm text-muted-foreground">Vector Keys</div>
+            </div>
+            <div className="bg-gradient-to-br from-background to-card p-6 rounded-xl text-center border">
+              <div className={`text-2xl font-bold mb-2 ${llmOnline ? 'text-green-500' : 'text-yellow-500'}`}>
+                LLM: {llmOnline ? 'ONLINE' : 'OFFLINE'}
+              </div>
+              <div className="text-sm text-muted-foreground">Spark LLM Availability</div>
             </div>
           </div>
           <div className="flex gap-4 flex-wrap">

@@ -45,7 +45,6 @@ export function VisualFileBrowser(
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
-  const [currentPath, setCurrentPath] = useState('/')
 
   // Sample data for demonstration
   useEffect(() => {
