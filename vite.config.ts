@@ -22,4 +22,13 @@ export default defineConfig({
       '@': resolve(projectRoot, 'src')
     }
   },
+  server: {
+    host: true,
+    port: Number(process.env.PORT) || 5000,
+    strictPort: true,
+  },
+  preview: {
+    host: true,
+    port: Number(process.env.PREVIEW_PORT) || 5001,
+  },
 });

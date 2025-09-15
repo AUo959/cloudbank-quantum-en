@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Skeleton } from '@/components/ui/skeleton'
 import { 
   Brain,
   Lightning,
@@ -43,6 +44,7 @@ export function RealTimeAnalyticsDashboard() {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null)
   const metricsCanvasRef = useRef<HTMLCanvasElement>(null)
   const systemCanvasRef = useRef<HTMLCanvasElement>(null)
+  const isInitializing = (!metrics || metrics.length === 0) && (!tasks || tasks.length === 0)
 
   // Initialize sample metrics
   useEffect(() => {
@@ -171,162 +173,150 @@ export function RealTimeAnalyticsDashboard() {
     return () => clearInterval(interval)
   }, [isRunning, metrics, setMetrics, setTasks])
 
-  // Draw metrics visualization
+  // Draw metrics visualization (DPR-aware + resize)
   useEffect(() => {
     const canvas = metricsCanvasRef.current
     if (!canvas || !metrics) return
 
     const ctx = canvas.getContext('2d')!
-    const width = canvas.width
-    const height = canvas.height
+    const dpr = window.devicePixelRatio || 1
+    const resize = () => {
+      const { width: cssW, height: cssH } = canvas.getBoundingClientRect()
+      canvas.width = Math.max(1, Math.floor(cssW * dpr))
+      canvas.height = Math.max(1, Math.floor(cssH * dpr))
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-    // Clear canvas
-    ctx.fillStyle = 'oklch(0.98 0.005 280)'
-    ctx.fillRect(0, 0, width, height)
-
-    // Draw grid
-    ctx.strokeStyle = 'oklch(0.88 0.03 280 / 0.3)'
-    ctx.lineWidth = 1
-    
-    for (let i = 0; i <= 10; i++) {
-      const y = (height / 10) * i
-      ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(width, y)
-      ctx.stroke()
+      // Redraw on resize
+      draw(cssW, cssH)
     }
 
-    for (let i = 0; i <= 20; i++) {
-      const x = (width / 20) * i
-      ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, height)
-      ctx.stroke()
+    const draw = (width: number, height: number) => {
+      ctx.fillStyle = 'oklch(0.98 0.005 280)'
+      ctx.fillRect(0, 0, width, height)
+
+      ctx.strokeStyle = 'oklch(0.88 0.03 280 / 0.3)'
+      ctx.lineWidth = 1
+      for (let i = 0; i <= 10; i++) {
+        const y = (height / 10) * i
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke()
+      }
+      for (let i = 0; i <= 20; i++) {
+        const x = (width / 20) * i
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke()
+      }
+
+      metrics.forEach((metric, index) => {
+        const yOffset = (height / metrics.length) * index
+        const sectionHeight = height / metrics.length - 10
+
+        ctx.strokeStyle = metric.color
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        metric.history.forEach((value, i) => {
+          const x = (width / metric.history.length) * i
+          const y = yOffset + sectionHeight - (value / 100) * sectionHeight
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+        })
+        ctx.stroke()
+
+        ctx.fillStyle = metric.color + '20'
+        ctx.beginPath()
+        metric.history.forEach((value, i) => {
+          const x = (width / metric.history.length) * i
+          const y = yOffset + sectionHeight - (value / 100) * sectionHeight
+          if (i === 0) { ctx.moveTo(x, yOffset + sectionHeight); ctx.lineTo(x, y) } else { ctx.lineTo(x, y) }
+        })
+        ctx.lineTo(width, yOffset + sectionHeight)
+        ctx.closePath(); ctx.fill()
+
+        ctx.fillStyle = metric.color
+        ctx.font = '14px Inter'
+        ctx.textAlign = 'left'
+        ctx.fillText(`${metric.name}: ${metric.value.toFixed(1)}%`, 10, yOffset + 20)
+      })
     }
 
-    // Draw metrics
-    metrics.forEach((metric, index) => {
-      const yOffset = (height / metrics.length) * index
-      const sectionHeight = height / metrics.length - 10
+    const ro = new ResizeObserver(resize)
+    ro.observe(canvas)
+    resize()
 
-      // Draw metric line
-      ctx.strokeStyle = metric.color
-      ctx.lineWidth = 2
-      ctx.beginPath()
+    // Redraw when metrics change
+    const rect = canvas.getBoundingClientRect()
+    draw(rect.width, rect.height)
 
-      metric.history.forEach((value, i) => {
-        const x = (width / metric.history.length) * i
-        const y = yOffset + sectionHeight - (value / 100) * sectionHeight
-
-        if (i === 0) {
-          ctx.moveTo(x, y)
-        } else {
-          ctx.lineTo(x, y)
-        }
-      })
-      ctx.stroke()
-
-      // Draw metric area
-      ctx.fillStyle = metric.color + '20'
-      ctx.beginPath()
-      metric.history.forEach((value, i) => {
-        const x = (width / metric.history.length) * i
-        const y = yOffset + sectionHeight - (value / 100) * sectionHeight
-
-        if (i === 0) {
-          ctx.moveTo(x, yOffset + sectionHeight)
-          ctx.lineTo(x, y)
-        } else {
-          ctx.lineTo(x, y)
-        }
-      })
-      ctx.lineTo(width, yOffset + sectionHeight)
-      ctx.closePath()
-      ctx.fill()
-
-      // Draw current value
-      ctx.fillStyle = metric.color
-      ctx.font = '14px Inter'
-      ctx.textAlign = 'left'
-      ctx.fillText(
-        `${metric.name}: ${metric.value.toFixed(1)}%`,
-        10,
-        yOffset + 20
-      )
-    })
+    return () => { ro.disconnect() }
   }, [metrics])
 
-  // Draw system overview
+  // Draw system overview (animated + DPR-aware)
   useEffect(() => {
     const canvas = systemCanvasRef.current
     if (!canvas) return
-
     const ctx = canvas.getContext('2d')!
-    const width = canvas.width
-    const height = canvas.height
-    const centerX = width / 2
-    const centerY = height / 2
+    const dpr = window.devicePixelRatio || 1
+    let rafId = 0
 
-    // Clear canvas
-    ctx.fillStyle = 'oklch(0.98 0.005 280)'
-    ctx.fillRect(0, 0, width, height)
+    const resize = () => {
+      const { width: cssW, height: cssH } = canvas.getBoundingClientRect()
+      canvas.width = Math.max(1, Math.floor(cssW * dpr))
+      canvas.height = Math.max(1, Math.floor(cssH * dpr))
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
 
-    // Draw quantum field visualization
-    const time = Date.now() * 0.001
+    const draw = (t: number) => {
+      const { width: cssW, height: cssH } = canvas.getBoundingClientRect()
+      const width = cssW
+      const height = cssH
+      const centerX = width / 2
+      const centerY = height / 2
 
-    // Draw central quantum core
-    const coreRadius = 30 + Math.sin(time) * 5
-    const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, coreRadius)
-    gradient.addColorStop(0, 'oklch(0.7 0.15 290 / 0.8)')
-    gradient.addColorStop(1, 'oklch(0.7 0.15 290 / 0.1)')
-    
-    ctx.fillStyle = gradient
-    ctx.beginPath()
-    ctx.arc(centerX, centerY, coreRadius, 0, Math.PI * 2)
-    ctx.fill()
+      ctx.fillStyle = 'oklch(0.98 0.005 280)'
+      ctx.fillRect(0, 0, width, height)
 
-    // Draw orbiting elements
-    const numOrbits = 3
-    for (let orbit = 0; orbit < numOrbits; orbit++) {
-      const orbitRadius = 80 + orbit * 40
-      const numElements = 4 + orbit * 2
-      
-      for (let i = 0; i < numElements; i++) {
-        const angle = (time * 0.5 + i * (Math.PI * 2 / numElements) + orbit * 0.3) % (Math.PI * 2)
-        const x = centerX + Math.cos(angle) * orbitRadius
-        const y = centerY + Math.sin(angle) * orbitRadius
-        
-        const elementGradient = ctx.createRadialGradient(x, y, 0, x, y, 8)
-        elementGradient.addColorStop(0, 'oklch(0.65 0.18 260 / 0.9)')
-        elementGradient.addColorStop(1, 'oklch(0.65 0.18 260 / 0.1)')
-        
-        ctx.fillStyle = elementGradient
-        ctx.beginPath()
-        ctx.arc(x, y, 6, 0, Math.PI * 2)
-        ctx.fill()
+      const time = t * 0.001
+      const coreRadius = 30 + Math.sin(time) * 5
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, coreRadius)
+      gradient.addColorStop(0, 'oklch(0.7 0.15 290 / 0.8)')
+      gradient.addColorStop(1, 'oklch(0.7 0.15 290 / 0.1)')
+      ctx.fillStyle = gradient
+      ctx.beginPath(); ctx.arc(centerX, centerY, coreRadius, 0, Math.PI * 2); ctx.fill()
 
-        // Draw connection to center
-        ctx.strokeStyle = 'oklch(0.7 0.15 290 / 0.3)'
-        ctx.lineWidth = 1
-        ctx.beginPath()
-        ctx.moveTo(centerX, centerY)
-        ctx.lineTo(x, y)
-        ctx.stroke()
+      const numOrbits = 3
+      for (let orbit = 0; orbit < numOrbits; orbit++) {
+        const orbitRadius = 80 + orbit * 40
+        const numElements = 4 + orbit * 2
+        for (let i = 0; i < numElements; i++) {
+          const angle = (time * 0.5 + i * (Math.PI * 2 / numElements) + orbit * 0.3) % (Math.PI * 2)
+          const x = centerX + Math.cos(angle) * orbitRadius
+          const y = centerY + Math.sin(angle) * orbitRadius
+          const elementGradient = ctx.createRadialGradient(x, y, 0, x, y, 8)
+          elementGradient.addColorStop(0, 'oklch(0.65 0.18 260 / 0.9)')
+          elementGradient.addColorStop(1, 'oklch(0.65 0.18 260 / 0.1)')
+          ctx.fillStyle = elementGradient
+          ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill()
+          ctx.strokeStyle = 'oklch(0.7 0.15 290 / 0.3)'
+          ctx.lineWidth = 1
+          ctx.beginPath(); ctx.moveTo(centerX, centerY); ctx.lineTo(x, y); ctx.stroke()
+        }
       }
+
+      for (let i = 0; i < 5; i++) {
+        const pulseTime = ((time + i * 0.5) % 2)
+        const pulseRadius = pulseTime * 100
+        const pulseOpacity = 1 - pulseTime / 2
+        ctx.strokeStyle = `oklch(0.7 0.15 290 / ${pulseOpacity * 0.3})`
+        ctx.lineWidth = 2
+        ctx.beginPath(); ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2); ctx.stroke()
+      }
+
+      if (isRunning) rafId = requestAnimationFrame(draw)
     }
 
-    // Draw quantum pulses
-    for (let i = 0; i < 5; i++) {
-      const pulseTime = (time + i * 0.5) % 2
-      const pulseRadius = pulseTime * 100
-      const pulseOpacity = 1 - pulseTime / 2
+    const ro = new ResizeObserver(() => { resize() })
+    ro.observe(canvas)
+    resize()
+    rafId = requestAnimationFrame(draw)
 
-      ctx.strokeStyle = `oklch(0.7 0.15 290 / ${pulseOpacity * 0.3})`
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2)
-      ctx.stroke()
-    }
+    return () => { cancelAnimationFrame(rafId); ro.disconnect() }
   }, [isRunning])
 
   const getTrendIcon = (trend: string) => {
@@ -348,6 +338,28 @@ export function RealTimeAnalyticsDashboard() {
 
   return (
     <div className="space-y-6">
+      {isInitializing && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Loading Metrics</CardTitle>
+              <CardDescription>Initializing realtime streams…</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[300px] w-full rounded-lg" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Preparing Visualization</CardTitle>
+              <CardDescription>Setting up canvas renderer…</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[300px] w-full rounded-lg" />
+            </CardContent>
+          </Card>
+        </div>
+      )}
       {/* System Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="quantum-field">

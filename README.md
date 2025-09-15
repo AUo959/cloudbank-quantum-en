@@ -21,3 +21,22 @@ No problem! If you were just checking things out and don’t need to keep this c
 📄 License For Spark Template Resources 
 
 The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
+
+## Running in Spark/Codespaces
+
+- Dev server binds to `0.0.0.0` on port `5000` (config in `vite.config.ts`).
+
+```bash
+npm run dev
+```
+
+Use `PORT=xxxx npm run dev` to override.
+
+- Preview build binds to `0.0.0.0:5001`:
+
+```bash
+npm run build
+npm run preview
+```
+
+Use `PREVIEW_PORT=yyyy npm run preview` to override.
