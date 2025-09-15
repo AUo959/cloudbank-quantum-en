@@ -240,8 +240,30 @@ export function QuantumDatabase(
     const startTime = Date.now()
 
     try {
+      const spark = (window as any).spark
+      if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
+        const matchingFiles = safeFiles.filter(file => 
+          file.name.toLowerCase().includes(advancedQuery.toLowerCase()) ||
+          file.vectorChain.toLowerCase().includes(advancedQuery.toLowerCase()) ||
+          (file.metadata?.tags || []).some(t => t.toLowerCase().includes(advancedQuery.toLowerCase()))
+        )
+
+        const newQuery: DatabaseQuery = {
+          id: Date.now().toString(),
+          query: advancedQuery,
+          filters: {},
+          results: matchingFiles,
+          executedAt: new Date().toISOString(),
+          executionTime: Date.now() - startTime
+        }
+
+        setQueries((current = []) => [newQuery, ...current].slice(0, 20))
+        toast.info('LLM unavailable; executed basic search instead')
+        return
+      }
+
       // Use LLM to process natural language query
-      const prompt = (window as any).spark.llmPrompt`
+      const prompt = spark.llmPrompt`
       You are a quantum database query processor. Analyze this natural language query and return a JSON response with matching criteria:
       
       Query: "${advancedQuery}"
@@ -262,7 +284,7 @@ export function QuantumDatabase(
       
       Base your response on the actual file data provided.`
 
-      const response = await (window as any).spark.llm(prompt, 'gpt-4o', true)
+      const response = await spark.llm(prompt, 'gpt-4o', true)
       const queryResult = JSON.parse(response)
 
       const matchingFiles = safeFiles.filter(file => 

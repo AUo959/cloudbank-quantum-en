@@ -128,7 +128,11 @@ export function MetadataAnalyzer() {
       }
 
       // Perform AI-powered content analysis
-      const prompt = (window as any).spark.llmPrompt`
+      const spark = (window as any).spark
+      if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
+        throw new Error('Spark LLM unavailable')
+      }
+      const prompt = spark.llmPrompt`
       You are an advanced AI file metadata analyzer. Analyze the following file information and extract comprehensive metadata:
 
       File Name: ${file.name}
@@ -182,7 +186,7 @@ export function MetadataAnalyzer() {
       
       Only include sections relevant to the file type. Be realistic about what can be inferred from just the file metadata.`
 
-      const response = await (window as any).spark.llm(prompt, 'gpt-4o', true)
+  const response = await spark.llm(prompt, 'gpt-4o', true)
       const analysisResult = JSON.parse(response)
 
       // Create metadata record

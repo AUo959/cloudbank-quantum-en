@@ -148,7 +148,11 @@ export function QuantumParser() {
 
   // Enhanced file parsing with AI assistance
   const parseFileWithAI = async (file: any, strategy: string): Promise<ParsedFile[]> => {
-    const prompt = (window as any).spark.llmPrompt`
+    const spark = (window as any).spark
+    if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
+      return parseFileTraditionally(file)
+    }
+    const prompt = spark.llmPrompt`
     You are a quantum file parser. Analyze this file and provide parsing instructions:
     
     File: ${file.name}
@@ -179,7 +183,7 @@ export function QuantumParser() {
     with strong relationships to other files.`
 
     try {
-      const response = await (window as any).spark.llm(prompt, 'gpt-4o', true)
+      const response = await spark.llm(prompt, 'gpt-4o', true)
       const parseInstructions = JSON.parse(response)
       
       // Simulate parsing based on AI instructions
