@@ -1,11 +1,13 @@
 #!/usr/bin/env node
+/* eslint-env node */
+
 // Detects drift between package.json and package-lock.json by asking npm to
 // regenerate the lockfile in-memory, comparing hashes, and restoring the file
 // if differences are found (unless --fix is passed).
 //
 // Usage:
-//  - node scripts/check-lockfile-drift.mjs          # exits non-zero if drift
-//  - node scripts/check-lockfile-drift.mjs --fix    # updates lockfile in place
+//   - node scripts/check-lockfile-drift.mjs          # exits non-zero if drift
+//   - node scripts/check-lockfile-drift.mjs --fix    # updates lockfile in place
 
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
@@ -72,7 +74,7 @@ if (!hasFixFlag) {
         if (lines.length > 80) console.error(`\n… (${lines.length - 80} more lines)`) 
       }
     }
-  } catch {}
+  } catch (e) { void e }
   process.exit(2)
 }
 
