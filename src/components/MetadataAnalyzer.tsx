@@ -186,8 +186,8 @@ export function MetadataAnalyzer() {
       
       Only include sections relevant to the file type. Be realistic about what can be inferred from just the file metadata.`
 
-  const response = await spark.llm(prompt, 'gpt-4o', true)
-      const analysisResult = JSON.parse(response)
+    const response = await spark.llm(prompt, 'gpt-4o', true)
+    const analysisResult = JSON.parse(response)
 
       // Create metadata record
       const metadata: ExtractedMetadata = {
