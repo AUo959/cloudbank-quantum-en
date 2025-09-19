@@ -37,7 +37,10 @@ interface FileItem {
   vectorKey?: string
 }
 
-export function VisualFileBrowser() {
+export function VisualFileBrowser(
+  { onOpenInDatabase, onDelete }:
+  { onOpenInDatabase?: (id: string) => void; onDelete?: (id: string) => void }
+) {
   const [files, setFiles] = useKV<FileItem[]>('cloudbank-files', [])
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -216,6 +219,11 @@ export function VisualFileBrowser() {
                   ))}
                 </div>
               )}
+
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onOpenInDatabase?.(file.id) }}>Open in Database</Button>
+                <Button variant="destructive" size="sm" onClick={(e) => { e.stopPropagation(); onDelete?.(file.id) }}>Delete</Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -259,6 +267,11 @@ export function VisualFileBrowser() {
                       VK
                     </Badge>
                   )}
+                </div>
+
+                <div className="flex items-center gap-2 ml-4">
+                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onOpenInDatabase?.(file.id) }}>Open in Database</Button>
+                  <Button variant="destructive" size="sm" onClick={(e) => { e.stopPropagation(); onDelete?.(file.id) }}>Delete</Button>
                 </div>
               </div>
             </div>

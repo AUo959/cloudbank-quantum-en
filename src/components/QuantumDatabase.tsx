@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { 
   Database, 
   MagnifyingGlass, 
@@ -85,7 +86,9 @@ interface DatabaseAnalytics {
   }>
 }
 
-export function QuantumDatabase() {
+export function QuantumDatabase(
+  { onOpenInBrowser, onDelete, onBulkDelete }: { onOpenInBrowser?: (id: string) => void; onDelete?: (id: string) => void; onBulkDelete?: (ids: string[]) => void } = {}
+) {
   const [files] = useKV<QuantumFile[]>('quantum-files', [])
   const [queries, setQueries] = useKV<DatabaseQuery[]>('database-queries', [])
   const [searchTerm, setSearchTerm] = useState('')
@@ -104,6 +107,13 @@ export function QuantumDatabase() {
 
   const safeFiles = files || []
   const safeQueries = queries || []
+  const handleBulkDelete = () => {
+    if (selectedFiles.length === 0) return
+    if (onBulkDelete) onBulkDelete(selectedFiles)
+    else if (onDelete) selectedFiles.forEach(id => onDelete(id))
+    setSelectedFiles([])
+  }
+
 
   // Generate real-time analytics
   useEffect(() => {
@@ -498,6 +508,16 @@ export function QuantumDatabase() {
           {/* File Table */}
           <Card className="quantum-field">
             <CardContent className="p-0">
+              <div className="flex items-center justify-between p-3 border-b">
+                <div className="text-sm text-muted-foreground">
+                  {selectedFiles.length > 0 ? `${selectedFiles.length} selected` : `${paginatedFiles.length} shown`}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="destructive" disabled={selectedFiles.length === 0} onClick={handleBulkDelete}>
+                    <Trash className="w-4 h-4 mr-1" /> Delete Selected
+                  </Button>
+                </div>
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -520,7 +540,9 @@ export function QuantumDatabase() {
                 </TableHeader>
                 <TableBody>
                   {paginatedFiles.map((file) => (
-                    <TableRow key={file.id} className="state-collapse">
+                    <ContextMenu key={file.id}>
+                      <ContextMenuTrigger asChild>
+                        <TableRow className="state-collapse">
                       <TableCell>
                         <input
                           type="checkbox"
@@ -560,11 +582,22 @@ export function QuantumDatabase() {
                         {new Date(file.uploadedAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Button size="sm" variant="ghost">
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="ghost" onClick={() => onOpenInBrowser?.(file.id)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => onDelete?.(file.id)}>
+                            <Trash className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </TableCell>
-                    </TableRow>
+                        </TableRow>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent>
+                        <ContextMenuItem onClick={() => onOpenInBrowser?.(file.id)}>Open in Browser</ContextMenuItem>
+                        <ContextMenuItem className="text-destructive" onClick={() => onDelete?.(file.id)}>Delete</ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
                   ))}
                 </TableBody>
               </Table>
@@ -626,6 +659,13 @@ export function QuantumDatabase() {
                     <Activity className="w-8 h-8 mx-auto mb-2 text-accent quantum-pulse" />
                     <p className="text-2xl font-bold">{formatFileSize(analytics.totalSize)}</p>
                     <p className="text-sm text-muted-foreground">Total Size</p>
+                    {onOpenInBrowser && (
+                      <div className="pt-3">
+                        <Button size="sm" variant="outline" onClick={() => onOpenInBrowser(safeFiles[0]?.id || '')}>
+                          Open in Browser
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
                 <Card className="quantum-field">

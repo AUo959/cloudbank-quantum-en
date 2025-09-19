@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Prevent pushing if local branch is behind or has merge-base issues.
+set -euo pipefail
+
+remote_name="$1"
+remote_url="$2"
+
+# Determine current branch
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Fetch remote ref for current branch without tags for speed
+git fetch --quiet --no-tags "$remote_name" "+refs/heads/$branch:refs/remotes/$remote_name/$branch"
+
+local_ref=$(git rev-parse "$branch")
+remote_ref=$(git rev-parse "refs/remotes/$remote_name/$branch" || echo "")
+
+if [[ -z "$remote_ref" ]]; then
+  exit 0
+fi
+
+base=$(git merge-base "$local_ref" "$remote_ref")
+
+if [[ "$local_ref" == "$remote_ref" ]]; then
+  echo "✔ Branch '$branch' is up to date with $remote_name/$branch." >&2
+  exit 0
+fi
+
+if [[ "$base" == "$remote_ref" ]]; then
+  echo "✔ Branch '$branch' is ahead of $remote_name/$branch; safe to push." >&2
+  exit 0
+fi
+
+if [[ "$base" == "$local_ref" ]]; then
+  echo "✖ Branch '$branch' is behind $remote_name/$branch. Run: git pull --rebase" >&2
+  exit 1
+fi
+
+echo "✖ Branch '$branch' has diverged from $remote_name/$branch. Run: git fetch && git rebase $remote_name/$branch" >&2
+exit 1
