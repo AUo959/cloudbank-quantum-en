@@ -1,9 +1,11 @@
-# ✨ Welcome to Your Spark Template!
+# ✨ Welcome to Your Spark Template
+
 You've just launched your brand-new Spark Template Codespace — everything’s fired up and ready for you to explore, build, and create with Spark!
 
 This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
 
 🚀 What's Inside?
+
 - A clean, minimal Spark environment
 - Pre-configured for local development
 - Ready to scale with your ideas
@@ -18,7 +20,7 @@ No problem! If you were just checking things out and don’t need to keep this c
 - Simply delete your Spark.
 - Everything will be cleaned up — no traces left behind.
 
-📄 License For Spark Template Resources 
+📄 License For Spark Template Resources
 
 The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
 
@@ -40,3 +42,19 @@ npm run preview
 ```
 
 Use `PREVIEW_PORT=yyyy npm run preview` to override.
+
+## Git Workflow Helpers
+
+- Enable local git hooks:
+
+```bash
+bash scripts/setup-githooks.sh
+```
+
+This installs a `pre-push` hook that prevents pushing when your branch is behind or diverged. It fetches the remote ref and suggests the correct rebase command.
+
+- Auto-merge PRs targeting `main`:
+  - Add the label `automerge` to the PR.
+  - The workflow `.github/workflows/enable-automerge.yml` will enable GitHub’s auto-merge (squash) for that PR.
+
+Note: PRs labeled `no-automerge` will be skipped by the auto-labeler.

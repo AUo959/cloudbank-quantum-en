@@ -8,6 +8,8 @@
         "kill": "fuser -k 5000/tcp",
         "build": "tsc -b --noCheck && vite build",
         "lint": "eslint .",
+        "lockfile:check": "node ./scripts/check-lockfile-drift.mjs",
+        "lockfile:fix": "node ./scripts/check-lockfile-drift.mjs --fix",
         "optimize": "vite optimize",
         "preview": "vite preview"
     },

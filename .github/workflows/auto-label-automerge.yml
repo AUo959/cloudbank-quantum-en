@@ -1,0 +1,78 @@
+name: Auto-label PRs for Auto-Merge
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, edited, labeled, unlabeled]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  pull-requests: write
+  contents: read
+  checks: read
+  statuses: read
+
+jobs:
+  label-automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check conditions and add 'automerge' label if eligible
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request || context.payload.review?.pull_request;
+            if (!pr) {
+              core.info('No pull_request in payload; skipping');
+              return;
+            }
+            if (pr.base.ref !== 'main') {
+              core.info('PR does not target main; skipping');
+              return;
+            }
+            if (pr.draft) {
+              core.info('PR is draft; skipping');
+              return;
+            }
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Respect opt-out label
+            const existingLabels = (pr.labels || []).map(l => l.name);
+            if (existingLabels.includes('no-automerge')) {
+              core.info('PR has no-automerge label; skipping');
+              return;
+            }
+
+            // Require at least one approval
+            const reviews = await github.rest.pulls.listReviews({ owner, repo, pull_number: pr.number, per_page: 100 });
+            const approvers = new Set();
+            for (const r of reviews.data) {
+              if (r.state === 'APPROVED') approvers.add(r.user?.login);
+            }
+            if (approvers.size < 1) {
+              core.info('No approvals yet; skipping');
+              return;
+            }
+
+            // All checks green (checks + status API)
+            const headSha = pr.head.sha;
+            const checks = await github.rest.checks.listForRef({ owner, repo, ref: headSha });
+            const checksOk = checks.data.total_count === 0 || checks.data.check_runs.every(cr => ['success','neutral','skipped'].includes(cr.conclusion || ''));
+            if (!checksOk) {
+              core.info('Checks not all green; skipping');
+              return;
+            }
+            const combined = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: headSha });
+            const statusOk = combined.data.statuses.length === 0 || combined.data.state === 'success';
+            if (!statusOk) {
+              core.info('Commit status not success; skipping');
+              return;
+            }
+
+            // Add label if missing
+            if (!existingLabels.includes('automerge')) {
+              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: ['automerge'] });
+              core.notice("Applied 'automerge' label");
+            } else {
+              core.info("'automerge' label already present");
+            }

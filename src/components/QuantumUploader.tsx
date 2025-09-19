@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { Upload, FileText, Archive, Image, Code, Cube } from '@phosphor-icons/react'
+import { Upload, FileText, Archive, Image as ImageIcon, Code, Cube } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 import { QuantumField } from './QuantumField'
@@ -28,6 +28,7 @@ interface QuantumFile {
     extractedFiles?: string[]
     aiAnalyzed?: boolean
     relatedFiles?: string[]
+    preview?: string
   }
 }
 
@@ -40,7 +41,7 @@ export function QuantumUploader() {
   const safeFiles = files || []
 
   const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return <Image className="w-5 h-5" />
+    if (type.startsWith('image/')) return <ImageIcon className="w-5 h-5" />
     if (type.includes('zip') || type.includes('archive')) return <Archive className="w-5 h-5" />
     if (type.includes('javascript') || type.includes('typescript') || type.includes('json')) return <Code className="w-5 h-5" />
     return <FileText className="w-5 h-5" />
@@ -64,6 +65,74 @@ export function QuantumUploader() {
       setUploadProgress((i + 1) * 25)
     }
 
+    // optional image thumbnail preview
+    let previewData: string | undefined
+  if (file.type.startsWith('image/')) {
+      try {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(String(reader.result))
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+        previewData = await new Promise<string>((resolve) => {
+          const img = new window.Image()
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            const maxW = 320, maxH = 200
+            let w = img.width, h = img.height
+            const scale = Math.min(maxW / w, maxH / h, 1)
+            w = Math.floor(w * scale); h = Math.floor(h * scale)
+            canvas.width = w; canvas.height = h
+            const ctx = canvas.getContext('2d')!
+            ctx.drawImage(img, 0, 0, w, h)
+            resolve(canvas.toDataURL('image/webp', 0.8))
+          }
+          img.src = dataUrl
+        })
+      } catch {}
+    } else if (file.type.startsWith('video/')) {
+      // Lightweight poster: seek to a small offset and capture
+      try {
+        const url = URL.createObjectURL(file)
+        previewData = await new Promise<string>((resolve, reject) => {
+          const video = document.createElement('video')
+          let done = false
+          const cleanup = () => { if (!done) { done = true; URL.revokeObjectURL(url) } }
+          const finish = () => {
+            const canvas = document.createElement('canvas')
+            const maxW = 320, maxH = 200
+            let w = video.videoWidth, h = video.videoHeight
+            const scale = Math.min(maxW / w, maxH / h, 1)
+            w = Math.floor(w * scale); h = Math.floor(h * scale)
+            canvas.width = w; canvas.height = h
+            const ctx = canvas.getContext('2d')!
+            ctx.drawImage(video, 0, 0, w, h)
+            const data = canvas.toDataURL('image/webp', 0.8)
+            cleanup(); resolve(data)
+          }
+          const onError = () => { cleanup(); reject(new Error('video load error')) }
+          const onSeeked = () => { if (!done) finish() }
+          const onLoadedMetadata = () => {
+            try { video.currentTime = Math.min(0.25, (video.duration || 1) * 0.1) } catch { /* ignore */ }
+          }
+          video.preload = 'metadata'
+          video.src = url
+          video.muted = true
+          video.playsInline = true
+          video.addEventListener('loadedmetadata', onLoadedMetadata, { once: true })
+          video.addEventListener('seeked', onSeeked, { once: true })
+          video.addEventListener('error', onError, { once: true })
+          setTimeout(() => { if (!done) { try { finish() } catch { onError() } } }, 1500)
+        })
+      } catch {}
+    } else if (file.type === 'application/pdf') {
+      // Placeholder PDF thumbnail (without pdf.js)
+      const text = (file.name || 'PDF').slice(0, 12)
+      const svg = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns='http://www.w3.org/2000/svg' width='320' height='200'><rect width='100%' height='100%' fill='hsl(10,80%,95%)'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='20' fill='hsl(10,60%,35%)'>${text}</text></svg>`
+      previewData = `data:image/svg+xml;base64,${btoa(svg)}`
+    }
+
     const quantumFile: QuantumFile = {
       id: Date.now().toString(),
       name: file.name,
@@ -85,7 +154,8 @@ export function QuantumUploader() {
         accessedBy: [],
         lastAccessed: new Date().toISOString(),
         aiAnalyzed: Math.random() > 0.5,
-        relatedFiles: []
+        relatedFiles: [],
+        preview: previewData
       }
     }
 

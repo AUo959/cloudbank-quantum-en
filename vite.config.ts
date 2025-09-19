@@ -4,12 +4,16 @@ import { defineConfig, PluginOption } from "vite";
 
 import sparkPlugin from "@github/spark/spark-vite-plugin";
 import createIconImportProxy from "@github/spark/vitePhosphorIconProxyPlugin";
-import { resolve } from 'path'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
 
-const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
+const projectRoot = process.env.PROJECT_ROOT || dirname(fileURLToPath(import.meta.url))
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Set base path for GitHub Pages project pages when provided.
+  // In the Pages workflow we set BASE_PATH=/cloudbank-quantum-en/
+  base: process.env.BASE_PATH || '/',
   plugins: [
     react(),
     tailwindcss(),

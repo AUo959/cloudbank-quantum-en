@@ -1,16 +1,36 @@
 import { Button } from '@/components/ui/button'
 import { RealTimeAnalyticsDashboard } from '@/components/RealTimeAnalyticsDashboard'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { VisualFileBrowser } from '@/components/VisualFileBrowser'
+import { QuantumDatabase } from '@/components/QuantumDatabase'
+import { VectorKeyManager } from '@/components/VectorKeyManager'
+import { QuantumNetworkVisualization } from '@/components/QuantumNetworkVisualization'
+import { Quantum3DVisualization } from '@/components/Quantum3DVisualization'
+import { QuantumUploader } from '@/components/QuantumUploader'
+import { KVDataBridge } from '@/components/KVDataBridge'
 import { useKV } from '@github/spark/hooks'
+import { useState } from 'react'
 
 export default function App() {
+  const [tab, setTab] = useState('dashboard')
   const toggleTheme = () => {
     const el = document.documentElement
     el.dataset.appearance = el.dataset.appearance === 'dark' ? 'light' : 'dark'
   }
   const [, setFiles] = useKV<any[]>('quantum-files', [])
+  const [cloudFiles, setCloudFiles] = useKV<any[]>('cloudbank-files', [])
   const [, setMetrics] = useKV<any[]>('analytics-metrics', [])
   const [, setTasks] = useKV<any[]>('processing-tasks', [])
   const clearKV = () => { setFiles([]); setMetrics([]); setTasks([]) }
+  const openInDatabase = (id: string) => setTab('database')
+  const deleteEverywhere = (id: string) => {
+    setCloudFiles((cur = []) => cur.filter((f: any) => f.id !== id))
+    setFiles((cur = []) => cur.filter((f: any) => f.id !== id))
+  }
+  const bulkDeleteEverywhere = (ids: string[]) => {
+    setCloudFiles((cur = []) => cur.filter((f: any) => !ids.includes(f.id)))
+    setFiles((cur = []) => cur.filter((f: any) => !ids.includes(f.id)))
+  }
   return (
     <div className="min-h-screen bg-background text-foreground p-8 font-sans">
       <div className="max-w-[1200px] mx-auto">
@@ -40,7 +60,7 @@ export default function App() {
             </div>
           </div>
           <div className="flex gap-4 flex-wrap">
-            <Button className="quantum-shimmer" variant="default">📁 Upload Files</Button>
+            <Button className="quantum-shimmer" variant="default" onClick={() => setTab('uploader')}>📁 Upload Files</Button>
             <Button variant="outline">🔑 Manage Keys</Button>
             <Button variant="secondary">🌐 Vector Database</Button>
           </div>
@@ -66,9 +86,48 @@ export default function App() {
           </div>
         </div>
 
-        {/* Analytics Panel Mount */}
+        {/* Workspace Tabs: mount visual interface components */}
         <div className="mt-8">
-          <RealTimeAnalyticsDashboard />
+          <Tabs value={tab} onValueChange={setTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-7 quantum-field">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="uploader">Uploader</TabsTrigger>
+              <TabsTrigger value="browser">File Browser</TabsTrigger>
+              <TabsTrigger value="database">Database</TabsTrigger>
+              <TabsTrigger value="keys">Keys</TabsTrigger>
+              <TabsTrigger value="network">Network</TabsTrigger>
+              <TabsTrigger value="viz3d">3D</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="dashboard">
+              <RealTimeAnalyticsDashboard />
+            </TabsContent>
+
+            <TabsContent value="uploader">
+              <KVDataBridge />
+              <QuantumUploader />
+            </TabsContent>
+
+            <TabsContent value="browser">
+              <VisualFileBrowser onOpenInDatabase={openInDatabase} onDelete={deleteEverywhere} />
+            </TabsContent>
+
+            <TabsContent value="database">
+              <QuantumDatabase onOpenInBrowser={() => setTab('browser')} onDelete={deleteEverywhere} onBulkDelete={bulkDeleteEverywhere} />
+            </TabsContent>
+
+            <TabsContent value="keys">
+              <VectorKeyManager />
+            </TabsContent>
+
+            <TabsContent value="network">
+              <QuantumNetworkVisualization />
+            </TabsContent>
+
+            <TabsContent value="viz3d">
+              <Quantum3DVisualization />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
