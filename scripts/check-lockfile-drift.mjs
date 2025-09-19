@@ -1,83 +1,112 @@
 #!/usr/bin/env node
 /* eslint-env node */
 
-// Detects drift between package.json and package-lock.json by asking npm to
-// regenerate the lockfile in-memory, comparing hashes, and restoring the file
-// if differences are found (unless --fix is passed).
+// Thin CLI wrapper for lockfile drift detection with enhanced features
+// Supports structured output, manifest generation, and symbolic AI conventions
 //
 // Usage:
-//   - node scripts/check-lockfile-drift.mjs          # exits non-zero if drift
-//   - node scripts/check-lockfile-drift.mjs --fix    # updates lockfile in place
+//   - node scripts/check-lockfile-drift.mjs              # basic drift check
+//   - node scripts/check-lockfile-drift.mjs --fix        # fix drift by updating lockfile
+//   - node scripts/check-lockfile-drift.mjs --stdout-json # output JSON to stdout
+//   - node scripts/check-lockfile-drift.mjs --manifest-out path.json --glyphcard-out path.md
 
-import { createHash } from 'node:crypto'
-import { spawnSync } from 'node:child_process'
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { checkLockfileDrift, writeManifest, writeGlyphcard } from './lib/lockfile-drift.mjs'
 
-const root = resolve(process.cwd())
-const pkgPath = resolve(root, 'package.json')
-const lockPath = resolve(root, 'package-lock.json')
-
-const hasFixFlag = process.argv.includes('--fix')
-
-function sha256(buf) {
-  return createHash('sha256').update(buf).digest('hex')
+// Parse command line arguments
+const args = process.argv.slice(2)
+const flags = {
+  fix: args.includes('--fix'),
+  stdoutJson: args.includes('--stdout-json'),
+  manifestOut: getArgValue(args, '--manifest-out'),
+  glyphcardOut: getArgValue(args, '--glyphcard-out'),
+  previewLines: parseInt(getArgValue(args, '--preview-lines') || '80', 10),
+  seed: getArgValue(args, '--seed')
 }
 
-function die(msg) {
-  console.error(msg)
-  process.exit(1)
+function getArgValue(args, flag) {
+  const index = args.indexOf(flag)
+  return index !== -1 && index + 1 < args.length ? args[index + 1] : null
 }
 
-if (!existsSync(pkgPath)) die('package.json not found. Run from project root.')
-if (!existsSync(lockPath)) die('package-lock.json not found. Run npm install first.')
-
-const original = readFileSync(lockPath)
-const originalHash = sha256(original)
-
-// Ask npm to (re)compute the lockfile only, without installing modules.
-// Keep it quiet and fast; avoid scripts/audit/fund noise.
-const npmArgs = ['install', '--package-lock-only', '--ignore-scripts', '--no-audit', '--no-fund', '--loglevel=error']
-const res = spawnSync('npm', npmArgs, { stdio: hasFixFlag ? 'inherit' : 'pipe' })
-if (res.error) die(`Failed to run npm: ${res.error.message}`)
-if (res.status !== 0) die(`npm ${npmArgs.join(' ')} exited with code ${res.status}`)
-
-const updated = readFileSync(lockPath)
-const updatedHash = sha256(updated)
-
-const drifted = originalHash !== updatedHash
-
-if (!drifted) {
-  if (!hasFixFlag) {
-    // Restore exactly to avoid churn if npm changed formatting
-    writeFileSync(lockPath, original)
+function die(msg, code = 1) {
+  if (!flags.stdoutJson) {
+    console.error(msg)
   }
-  console.log('Lockfile check: OK — no drift detected.')
-  process.exit(0)
+  process.exit(code)
 }
 
-// Drift detected
-if (!hasFixFlag) {
-  // Restore original content so the working tree remains clean after the check
-  writeFileSync(lockPath, original)
-  console.error('Lockfile check: DRIFT DETECTED — package-lock.json is out of sync with package.json.')
-  console.error('Run: npm install  (or: npm run lockfile:fix) to update the lockfile, then commit it.')
-  // Optionally emit a short diff using git if available and the file is tracked
+async function main() {
   try {
-    const diff = spawnSync('git', ['diff', '--no-ext-diff', '--', 'package-lock.json'], { encoding: 'utf8' })
-    if (diff && diff.stdout) {
-      const lines = diff.stdout.trim().split('\n')
-      const preview = lines.slice(0, 80).join('\n') // cap output
-      if (preview) {
-        console.error('\n— Diff preview (first 80 lines) —')
-        console.error(preview)
-        if (lines.length > 80) console.error(`\n… (${lines.length - 80} more lines)`) 
+    // Call pure library function
+    const result = await checkLockfileDrift({
+      fix: flags.fix,
+      seed: flags.seed,
+      previewLines: flags.previewLines,
+      captureDiff: !flags.stdoutJson // Only capture diff for human-readable output
+    })
+
+    // Handle JSON output mode
+    if (flags.stdoutJson) {
+      console.log(JSON.stringify(result, null, 2))
+      process.exit(result.status === 'ok' || result.status === 'fixed' ? 0 : 2)
+    }
+
+    // Write manifest if requested
+    if (flags.manifestOut) {
+      try {
+        writeManifest(result, flags.manifestOut)
+      } catch (error) {
+        die(`Failed to write manifest to ${flags.manifestOut}: ${error.message}`)
       }
     }
-  } catch (e) { void e }
-  process.exit(2)
+
+    // Write glyphcard if requested
+    if (flags.glyphcardOut) {
+      try {
+        writeGlyphcard(result, flags.glyphcardOut)
+      } catch (error) {
+        die(`Failed to write glyphcard to ${flags.glyphcardOut}: ${error.message}`)
+      }
+    }
+
+    // Handle different result statuses
+    switch (result.status) {
+      case 'ok':
+        console.log('Lockfile check: OK — no drift detected.')
+        process.exit(0)
+        break
+
+      case 'fixed':
+        console.log('Lockfile check: DRIFT FOUND and FIXED — package-lock.json updated. Please commit the change.')
+        process.exit(0)
+        break
+
+      case 'drift':
+        console.error('Lockfile check: DRIFT DETECTED — package-lock.json is out of sync with package.json.')
+        console.error('Run: npm install  (or: npm run lockfile:fix) to update the lockfile, then commit it.')
+        
+        // Show diff preview if available
+        if (result.diffPreview && result.diffPreview.preview) {
+          console.error('\n— Diff preview —')
+          console.error(result.diffPreview.preview)
+          if (result.diffPreview.truncated) {
+            console.error(`\n… (${result.diffPreview.totalLines - flags.previewLines} more lines)`)
+          }
+        }
+        process.exit(2)
+        break
+
+      case 'error':
+        die(result.error, 1)
+        break
+
+      default:
+        die(`Unknown status: ${result.status}`, 1)
+    }
+
+  } catch (error) {
+    die(`Unexpected error: ${error.message}`, 1)
+  }
 }
 
-// --fix path: keep the updated lockfile on disk
-console.log('Lockfile check: DRIFT FOUND and FIXED — package-lock.json updated. Please commit the change.')
-process.exit(0)
+main()

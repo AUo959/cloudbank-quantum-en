@@ -10,6 +10,7 @@
         "lint": "eslint .",
         "lockfile:check": "node ./scripts/check-lockfile-drift.mjs",
         "lockfile:fix": "node ./scripts/check-lockfile-drift.mjs --fix",
+        "test:lockfile": "node scripts/test-lockfile-drift.mjs",
         "optimize": "vite optimize",
         "preview": "vite preview"
     },
