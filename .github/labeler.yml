@@ -1,0 +1,19 @@
+# Labels based on changed file paths
+
+ci:
+  - .github/workflows/**
+
+docs:
+  - "**/*.md"
+
+app:
+  - src/**
+  - vite.config.ts
+  - tailwind.config.js
+  - eslint.config.js
+  - tsconfig.json
+  - package.json
+
+assets:
+  - src/assets/**
+  - public/**

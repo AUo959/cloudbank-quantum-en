@@ -16,6 +16,7 @@ jobs:
     steps:
       - name: Enable Auto-Merge (squash)
         uses: peter-evans/enable-pull-request-automerge@v3
+        continue-on-error: true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-number: ${{ github.event.pull_request.number }}
