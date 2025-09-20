@@ -1,19 +1,23 @@
 # Labels based on changed file paths
 
 ci:
-  - .github/workflows/**
+  - changed-files:
+      - any-glob-to-any-file: .github/workflows/**
 
 docs:
-  - "**/*.md"
+  - changed-files:
+      - any-glob-to-any-file: "**/*.md"
 
 app:
-  - src/**
-  - vite.config.ts
-  - tailwind.config.js
-  - eslint.config.js
-  - tsconfig.json
-  - package.json
+  - changed-files:
+      - any-glob-to-any-file: src/**
+      - any-glob-to-any-file: vite.config.ts
+      - any-glob-to-any-file: tailwind.config.js
+      - any-glob-to-any-file: eslint.config.js
+      - any-glob-to-any-file: tsconfig.json
+      - any-glob-to-any-file: package.json
 
 assets:
-  - src/assets/**
-  - public/**
+  - changed-files:
+      - any-glob-to-any-file: src/assets/**
+      - any-glob-to-any-file: public/**
