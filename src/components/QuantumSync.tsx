@@ -21,7 +21,8 @@ import {
   CheckCircle,
   Warning,
   Info,
-  Share
+  Share,
+  Trash
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
@@ -282,6 +283,15 @@ export function QuantumSync() {
     } finally {
       setSyncing(false)
     }
+  }
+
+  const deleteEndpoint = (endpointId: string) => {
+    const target = safeEndpoints.find(e => e.id === endpointId)
+    const name = target?.name || 'this endpoint'
+    const confirmed = window.confirm(`Delete "${name}"? This action cannot be undone.`)
+    if (!confirmed) return
+    setSyncEndpoints((current = []) => current.filter(e => e.id !== endpointId))
+    toast.success('Endpoint deleted')
   }
 
   const getProtocolIcon = (protocol: string) => {
@@ -658,6 +668,14 @@ export function QuantumSync() {
                               className="quantum-shimmer"
                             >
                               <ArrowClockwise className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteEndpoint(endpoint.id)}
+                              disabled={isSyncing}
+                            >
+                              <Trash className="w-4 h-4" />
                             </Button>
                           </div>
                         </div>
