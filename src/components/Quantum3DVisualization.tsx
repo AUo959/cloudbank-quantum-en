@@ -2,22 +2,9 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { 
-  Atom, 
-  Network, 
-  Lightning, 
-  Eye, 
-  Cube, 
-  ArrowsClockwise,
-  Play,
-  Pause,
-  Plus,
-  Trash,
-  Gear
-} from '@phosphor-icons/react'
+import { Atom, Network, Lightning, Cube, ArrowsClockwise, Play, Pause, Plus, Gear } from '@phosphor-icons/react'
 import * as THREE from 'three'
 
 interface QuantumNode3D {
@@ -146,9 +133,11 @@ export function Quantum3DVisualization() {
     initializeNetwork(scene)
 
     // Cleanup
+    const container = mountRef.current
+    const dom = renderer.domElement
     return () => {
-      if (mountRef.current && renderer.domElement && mountRef.current.contains(renderer.domElement)) {
-        mountRef.current.removeChild(renderer.domElement)
+      if (container && dom && container.contains(dom)) {
+        container.removeChild(dom)
       }
       renderer.dispose()
     }

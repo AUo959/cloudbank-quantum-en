@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import QRCode from 'qrcode'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { QrCode, Download, Copy, Share, Atom, Network, Key } from '@phosphor-icons/react'
+import { QrCode, Download, Copy, Atom, Network, Key } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface VectorKey {
@@ -39,14 +38,15 @@ export function QuantumQRShare({ vectorKey, children }: QuantumQRShareProps) {
   const [shareableLink, setShareableLink] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
 
-  // Generate QR code when dialog opens
-  useEffect(() => {
-    if (isOpen && canvasRef.current) {
-      generateQRCode()
-    }
-  }, [isOpen, qrSize, includeMetadata, customEndpoint])
+  const generateQuantumSignature = useCallback(async (key: string): Promise<string> => {
+    const encoder = new TextEncoder()
+    const data = encoder.encode(key + vectorKey.entanglementChain + new Date().toISOString())
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16)
+  }, [vectorKey.entanglementChain])
 
-  const generateQRCode = async () => {
+  const generateQRCode = useCallback(async () => {
     if (!canvasRef.current) return
     
     setIsGenerating(true)
@@ -85,22 +85,21 @@ export function QuantumQRShare({ vectorKey, children }: QuantumQRShareProps) {
         },
         errorCorrectionLevel: 'H'
       })
-    } catch (error) {
+    } catch {
       toast.error('Failed to generate QR code')
-      console.error('QR generation error:', error)
     } finally {
       setIsGenerating(false)
     }
-  }
+  }, [qrSize, includeMetadata, customEndpoint, vectorKey.key, vectorKey.entanglementChain, vectorKey.permissions, vectorKey.name, vectorKey.quantumStrength, vectorKey.observerState, vectorKey.allowedAgents, vectorKey.projectSpace, vectorKey.expiresAt, generateQuantumSignature])
 
-  const generateQuantumSignature = async (key: string): Promise<string> => {
-    // Simple quantum-inspired signature using key entropy
-    const encoder = new TextEncoder()
-    const data = encoder.encode(key + vectorKey.entanglementChain + new Date().toISOString())
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16)
-  }
+  // Generate QR code when dialog opens
+  useEffect(() => {
+    if (isOpen && canvasRef.current) {
+      generateQRCode()
+    }
+  }, [isOpen, generateQRCode])
+
+  
 
   const downloadQRCode = () => {
     if (!canvasRef.current) return
@@ -131,7 +130,7 @@ export function QuantumQRShare({ vectorKey, children }: QuantumQRShareProps) {
           toast.success('QR code copied to clipboard')
         }
       })
-    } catch (error) {
+    } catch {
       toast.error('Failed to copy QR code to clipboard')
     }
   }

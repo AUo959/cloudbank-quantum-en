@@ -31,7 +31,7 @@ type FileItem = {
 
 export function KVDataBridge() {
   const [qFiles] = useKV<QuantumFile[]>('quantum-files', [])
-  const [cloudFiles, setCloudFiles] = useKV<FileItem[]>('cloudbank-files', [])
+  const [, setCloudFiles] = useKV<FileItem[]>('cloudbank-files', [])
 
   useEffect(() => {
     const src = qFiles || []

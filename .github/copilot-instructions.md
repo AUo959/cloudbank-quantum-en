@@ -19,7 +19,7 @@ Concise project essentials to move fast and stay consistent.
   const [items, setItems] = useKV<{id:string}[]>('items', [])
   setItems((cur = []) => [...cur, { id: crypto.randomUUID() }])
   ```
-- Known keys: `quantum-files`, `analytics-metrics`, `processing-tasks`.
+- Known keys: `quantum-files`, `cloudbank-files`, `analytics-metrics`, `processing-tasks`, `database-queries`, `vector-keys`, `parsed-archives`, `parsing-rules`, `extracted-metadata`, `analysis-jobs`.
 
 ### UI Patterns
 - Primitives in `src/components/ui/*` use CVA (`variant`, `size`) and `cn` from `src/lib/utils.ts`.
@@ -43,6 +43,16 @@ Concise project essentials to move fast and stay consistent.
 - Always provide `useKV` defaults and guard reads (`const safe = x || []`).
 - Use functional setters for arrays/objects.
 - Keep UI under `src/**` so Tailwind content paths pick it up.
+ - Guard Spark LLM access: some components use `window.spark.llm` and ``spark.llmPrompt``. Always check availability and provide fallbacks.
+   ```tsx
+   const spark = (window as any).spark
+   if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
+     // Fallback behavior (basic search / traditional parsing / enhanced random key)
+   } else {
+     const prompt = spark.llmPrompt`...`
+     const result = await spark.llm(prompt, 'gpt-4o', true)
+   }
+   ```
 
 ### Add a Feature (recipe)
 - Create under `src/components/`, compose UI primitives, use tokens.

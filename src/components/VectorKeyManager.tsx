@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Copy, Key, Eye, Lightning, Network, Shield, Atom, Download, QrCode, Share } from '@phosphor-icons/react'
 import { toast } from 'sonner'
@@ -44,7 +43,11 @@ export function VectorKeyManager() {
   // Generate quantum-secured key using LLM for enhanced entropy
   const generateQuantumKey = async (strength: string): Promise<string> => {
     if (strength === 'quantum-secured') {
-      const prompt = (window as any).spark.llmPrompt`Generate a cryptographically secure quantum vector key with the following requirements:
+      const spark = (window as any).spark
+      if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
+        return `qvk_enhanced_${Math.random().toString(36).substr(2, 16)}_${Date.now().toString(36)}`
+      }
+      const prompt = spark.llmPrompt`Generate a cryptographically secure quantum vector key with the following requirements:
       - 64 characters long
       - Include quantum state indicators (q, x, z bases)
       - Use base32 encoding with quantum-specific prefixes
@@ -52,7 +55,7 @@ export function VectorKeyManager() {
       - Include entanglement verification bits
       Return only the key string without explanation.`
       
-      const quantumKey = await (window as any).spark.llm(prompt, 'gpt-4o-mini')
+      const quantumKey = await spark.llm(prompt, 'gpt-4o-mini')
       return `qvk_quantum_${quantumKey.trim().replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}`
     } else if (strength === 'enhanced') {
       return `qvk_enhanced_${Math.random().toString(36).substr(2, 16)}_${Date.now().toString(36)}`
@@ -108,7 +111,7 @@ export function VectorKeyManager() {
       setKeyExpiry('')
       
       toast.success(`${quantumStrength === 'quantum-secured' ? 'Quantum-secured' : 'Enhanced'} vector key generated successfully`)
-    } catch (error) {
+    } catch {
       toast.error('Failed to generate quantum vector key')
     } finally {
       setIsGenerating(false)

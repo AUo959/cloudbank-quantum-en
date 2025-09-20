@@ -2,17 +2,7 @@ import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  Brain, 
-  Tag, 
-  Users, 
-  Heart, 
-  Code, 
-  Image, 
-  Hash,
-  Eye,
-  Clock
-} from '@phosphor-icons/react'
+import { Brain, Tag, Users, Heart, Code, Image, Hash, Eye } from '@phosphor-icons/react'
 
 interface ExtractedMetadata {
   id: string
@@ -66,7 +56,7 @@ interface FileMetadataViewProps {
   onAnalyze?: () => void
 }
 
-export function FileMetadataView({ fileId, fileName, metadata, onAnalyze }: FileMetadataViewProps) {
+export function FileMetadataView({ fileId: _fileId, fileName: _fileName, metadata, onAnalyze }: FileMetadataViewProps) {
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.8) return 'text-green-500'
     if (confidence >= 0.6) return 'text-yellow-500'
