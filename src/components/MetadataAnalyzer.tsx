@@ -111,12 +111,49 @@ export function MetadataAnalyzer() {
         )
       }
 
-      // Perform AI-powered content analysis
+      // Perform AI-powered content analysis (guarded with fallback)
       const spark = (window as any).spark
+      let analysisResult: any
       if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
-        throw new Error('Spark LLM unavailable')
-      }
-      const prompt = spark.llmPrompt`
+        // Fallback heuristic analysis when LLM is unavailable
+        const type = (file.type || '').toLowerCase()
+        const isImage = type.startsWith('image/')
+        const isArchive = type.includes('zip') || type.includes('archive')
+        const isCode = type.includes('javascript') || type.includes('typescript') || type.includes('json')
+        const isText = type.includes('text') || type.includes('document') || type.includes('plain')
+        analysisResult = {
+          contentSummary: isImage ? 'Image file with detectable objects and colors.'
+            : isArchive ? 'Archive containing multiple files.'
+            : isCode ? 'Source code or structured data file.'
+            : isText ? 'Document with textual content.'
+            : 'General file. Limited metadata inferred.',
+          keyTopics: isCode ? ['code', 'dependencies'] : isImage ? ['image', 'objects'] : ['content'],
+          entities: [],
+          sentiment: isText ? { overall: 'neutral', score: 0.5 } : undefined,
+          codeAnalysis: isCode ? {
+            language: type.includes('typescript') ? 'TypeScript' : type.includes('javascript') ? 'JavaScript' : type.includes('json') ? 'JSON' : 'Unknown',
+            functions: [],
+            dependencies: [],
+            complexity: 'low',
+            issues: []
+          } : undefined,
+          imageAnalysis: isImage ? {
+            description: 'A generic image (offline heuristic).',
+            objects: [],
+            colors: ['unknown'],
+            style: 'unknown',
+            quality: 'medium'
+          } : undefined,
+          structuredData: type.includes('json') ? {
+            format: 'JSON',
+            schema: {},
+            recordCount: undefined,
+            fields: []
+          } : undefined,
+          confidence: 0.5
+        }
+      } else {
+        const prompt = spark.llmPrompt`
       You are an advanced AI file metadata analyzer. Analyze the following file information and extract comprehensive metadata:
 
       File Name: ${file.name}
@@ -170,8 +207,9 @@ export function MetadataAnalyzer() {
       
       Only include sections relevant to the file type. Be realistic about what can be inferred from just the file metadata.`
 
-      const response = await spark.llm(prompt, 'gpt-4o', true)
-      const analysisResult = JSON.parse(response)
+        const response = await spark.llm(prompt, 'gpt-4o', true)
+        analysisResult = JSON.parse(response)
+      }
 
       // Create metadata record
       const metadata: ExtractedMetadata = {

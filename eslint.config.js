@@ -30,4 +30,9 @@ export default [
     languageOptions: { globals: { ...globals.node } },
     rules: { 'no-undef': 'off' },
   },
+  {
+    files: ['scripts/**/*.{js,mjs,cjs}'],
+    languageOptions: { globals: { ...globals.node } },
+    rules: { 'no-undef': 'off' },
+  },
 ]
