@@ -9,6 +9,7 @@ import { FileArchive, FileText, Atom, Cube, Lightning, TreeStructure, FolderOpen
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 import { QuantumField } from './QuantumField'
+import { llmJSON } from '@/lib/spark'
 
 interface ParsedFile {
   id: string
@@ -131,11 +132,7 @@ export function QuantumParser() {
 
   // Enhanced file parsing with AI assistance
   const parseFileWithAI = async (file: any, strategy: string): Promise<ParsedFile[]> => {
-    const spark = (window as any).spark
-    if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
-      return parseFileTraditionally(file)
-    }
-    const prompt = spark.llmPrompt`
+    const parseInstructions = await llmJSON<any>((spark) => spark.llmPrompt`
     You are a quantum file parser. Analyze this file and provide parsing instructions:
     
     File: ${file.name}
@@ -163,37 +160,34 @@ export function QuantumParser() {
     
     Consider quantum superposition for files with multiple possible interpretations,
     collapsed state for clearly defined structures, and entangled state for files
-    with strong relationships to other files.`
-
-    try {
-      const response = await spark.llm(prompt, 'gpt-4o', true)
-      const parseInstructions = JSON.parse(response)
-      
-      // Simulate parsing based on AI instructions
-      const parsedFile: ParsedFile = {
-        id: `parsed_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
-        originalName: file.name,
-        parsedName: file.name,
-        path: `/${file.name}`,
-        type: file.type,
-        size: file.size,
-        structure: parseInstructions.expectedStructure,
-        metadata: {
-          parseMethod: parseInstructions.parseMethod || 'ai-enhanced',
-          complexity: parseInstructions.complexity || Math.floor(Math.random() * 100),
-          relationships: parseInstructions.relationships || [],
-          tags: parseInstructions.tags || [],
-          checksum: `sha256_${Math.random().toString(36).substr(2, 16)}`
-        },
-        quantumState: parseInstructions.quantumState || 'superposition',
-        vectorChain: `vc_${Math.random().toString(36).substr(2, 8)}`
-      }
-
-      return [parsedFile]
-    } catch {
-      // Fallback to traditional parsing
-      return parseFileTraditionally(file)
+    with strong relationships to other files.`, async () => ({
+      parseMethod: 'ai-enhanced',
+      expectedStructure: { type: 'single-file', analyzed: false },
+      extractionSteps: [],
+      quantumState: 'superposition',
+      tags: [],
+      complexity: Math.floor(Math.random() * 100),
+      relationships: []
+    }))
+    const parsedFile: ParsedFile = {
+      id: `parsed_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
+      originalName: file.name,
+      parsedName: file.name,
+      path: `/${file.name}`,
+      type: file.type,
+      size: file.size,
+      structure: parseInstructions.expectedStructure,
+      metadata: {
+        parseMethod: parseInstructions.parseMethod || 'ai-enhanced',
+        complexity: parseInstructions.complexity || Math.floor(Math.random() * 100),
+        relationships: parseInstructions.relationships || [],
+        tags: parseInstructions.tags || [],
+        checksum: `sha256_${Math.random().toString(36).substr(2, 16)}`
+      },
+      quantumState: parseInstructions.quantumState || 'superposition',
+      vectorChain: `vc_${Math.random().toString(36).substr(2, 8)}`
     }
+    return [parsedFile]
   }
 
   const parseFileTraditionally = (file: any): ParsedFile[] => {

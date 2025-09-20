@@ -10,6 +10,7 @@ import { QuantumUploader } from '@/components/QuantumUploader'
 import { KVDataBridge } from '@/components/KVDataBridge'
 import { useKV } from '@github/spark/hooks'
 import { useEffect, useState } from 'react'
+import { isLLMAvailable } from '@/lib/spark'
 
 export default function App() {
   const [tab, setTab] = useState('dashboard')
@@ -34,8 +35,7 @@ export default function App() {
   }
   useEffect(() => {
     const check = () => {
-      const spark = (window as any).spark
-      setLlmOnline(!!(spark && typeof spark.llm === 'function' && typeof spark.llmPrompt === 'function'))
+      setLlmOnline(isLLMAvailable())
     }
     check()
     const id = setInterval(check, 3000)

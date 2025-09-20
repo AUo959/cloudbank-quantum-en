@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 import { QuantumQRShare } from '@/components/QuantumQRShare'
 import { QuantumQRScanner } from '@/components/QuantumQRScanner'
+import { llmJSON } from '@/lib/spark'
 
 interface VectorKey {
   id: string
@@ -43,20 +44,18 @@ export function VectorKeyManager() {
   // Generate quantum-secured key using LLM for enhanced entropy
   const generateQuantumKey = async (strength: string): Promise<string> => {
     if (strength === 'quantum-secured') {
-      const spark = (window as any).spark
-      if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
-        return `qvk_enhanced_${Math.random().toString(36).substr(2, 16)}_${Date.now().toString(36)}`
-      }
-      const prompt = spark.llmPrompt`Generate a cryptographically secure quantum vector key with the following requirements:
+      const result = await llmJSON<{ key: string }>((spark) => spark.llmPrompt`Generate a cryptographically secure quantum vector key with the following requirements:
       - 64 characters long
       - Include quantum state indicators (q, x, z bases)
       - Use base32 encoding with quantum-specific prefixes
       - Must be unique and unpredictable
       - Include entanglement verification bits
-      Return only the key string without explanation.`
-      
-      const quantumKey = await spark.llm(prompt, 'gpt-4o-mini')
-      return `qvk_quantum_${quantumKey.trim().replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}`
+      Return JSON: { "key": "<key-only>" }`,
+        () => ({ key: `qvk_enhanced_${Math.random().toString(36).substr(2, 16)}_${Date.now().toString(36)}` }),
+        'gpt-4o-mini',
+        true)
+      const sanitized = (result.key || '').trim().replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
+      return `qvk_quantum_${sanitized}`
     } else if (strength === 'enhanced') {
       return `qvk_enhanced_${Math.random().toString(36).substr(2, 16)}_${Date.now().toString(36)}`
     } else {

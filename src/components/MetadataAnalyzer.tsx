@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Brain, FileText, Image, Code, Archive, Activity, Tag, Clock, Hash, Lightbulb, CheckCircle, XCircle, Warning } from '@phosphor-icons/react'
+import { Brain, FileText, Image, Code, Archive, Pulse, Tag, Clock, Hash, Lightbulb, CheckCircle, XCircle, Warning } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
+import { llmJSON } from '@/lib/spark'
 
 interface ExtractedMetadata {
   id: string
@@ -112,48 +113,7 @@ export function MetadataAnalyzer() {
       }
 
       // Perform AI-powered content analysis (guarded with fallback)
-      const spark = (window as any).spark
-      let analysisResult: any
-      if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
-        // Fallback heuristic analysis when LLM is unavailable
-        const type = (file.type || '').toLowerCase()
-        const isImage = type.startsWith('image/')
-        const isArchive = type.includes('zip') || type.includes('archive')
-        const isCode = type.includes('javascript') || type.includes('typescript') || type.includes('json')
-        const isText = type.includes('text') || type.includes('document') || type.includes('plain')
-        analysisResult = {
-          contentSummary: isImage ? 'Image file with detectable objects and colors.'
-            : isArchive ? 'Archive containing multiple files.'
-            : isCode ? 'Source code or structured data file.'
-            : isText ? 'Document with textual content.'
-            : 'General file. Limited metadata inferred.',
-          keyTopics: isCode ? ['code', 'dependencies'] : isImage ? ['image', 'objects'] : ['content'],
-          entities: [],
-          sentiment: isText ? { overall: 'neutral', score: 0.5 } : undefined,
-          codeAnalysis: isCode ? {
-            language: type.includes('typescript') ? 'TypeScript' : type.includes('javascript') ? 'JavaScript' : type.includes('json') ? 'JSON' : 'Unknown',
-            functions: [],
-            dependencies: [],
-            complexity: 'low',
-            issues: []
-          } : undefined,
-          imageAnalysis: isImage ? {
-            description: 'A generic image (offline heuristic).',
-            objects: [],
-            colors: ['unknown'],
-            style: 'unknown',
-            quality: 'medium'
-          } : undefined,
-          structuredData: type.includes('json') ? {
-            format: 'JSON',
-            schema: {},
-            recordCount: undefined,
-            fields: []
-          } : undefined,
-          confidence: 0.5
-        }
-      } else {
-        const prompt = spark.llmPrompt`
+      const analysisResult: any = await llmJSON<any>((spark) => spark.llmPrompt`
       You are an advanced AI file metadata analyzer. Analyze the following file information and extract comprehensive metadata:
 
       File Name: ${file.name}
@@ -205,11 +165,44 @@ export function MetadataAnalyzer() {
         "confidence": 0.8
       }
       
-      Only include sections relevant to the file type. Be realistic about what can be inferred from just the file metadata.`
-
-        const response = await spark.llm(prompt, 'gpt-4o', true)
-        analysisResult = JSON.parse(response)
-      }
+      Only include sections relevant to the file type. Be realistic about what can be inferred from just the file metadata.`, async () => {
+        const type = (file.type || '').toLowerCase()
+        const isImage = type.startsWith('image/')
+        const isArchive = type.includes('zip') || type.includes('archive')
+        const isCode = type.includes('javascript') || type.includes('typescript') || type.includes('json')
+        const isText = type.includes('text') || type.includes('document') || type.includes('plain')
+        return {
+          contentSummary: isImage ? 'Image file with detectable objects and colors.'
+            : isArchive ? 'Archive containing multiple files.'
+            : isCode ? 'Source code or structured data file.'
+            : isText ? 'Document with textual content.'
+            : 'General file. Limited metadata inferred.',
+          keyTopics: isCode ? ['code', 'dependencies'] : isImage ? ['image', 'objects'] : ['content'],
+          entities: [],
+          sentiment: isText ? { overall: 'neutral', score: 0.5 } : undefined,
+          codeAnalysis: isCode ? {
+            language: type.includes('typescript') ? 'TypeScript' : type.includes('javascript') ? 'JavaScript' : type.includes('json') ? 'JSON' : 'Unknown',
+            functions: [],
+            dependencies: [],
+            complexity: 'low',
+            issues: []
+          } : undefined,
+          imageAnalysis: isImage ? {
+            description: 'A generic image (offline heuristic).',
+            objects: [],
+            colors: ['unknown'],
+            style: 'unknown',
+            quality: 'medium'
+          } : undefined,
+          structuredData: type.includes('json') ? {
+            format: 'JSON',
+            schema: {},
+            recordCount: undefined,
+            fields: []
+          } : undefined,
+          confidence: 0.5
+        }
+      })
 
       // Create metadata record
       const metadata: ExtractedMetadata = {
@@ -296,7 +289,7 @@ export function MetadataAnalyzer() {
     switch (status) {
       case 'completed': return <CheckCircle className="w-4 h-4 text-green-500" />
       case 'failed': return <XCircle className="w-4 h-4 text-red-500" />
-      case 'processing': return <Activity className="w-4 h-4 text-blue-500 animate-spin" />
+  case 'processing': return <Pulse className="w-4 h-4 text-blue-500 animate-spin" />
       default: return <Clock className="w-4 h-4 text-yellow-500" />
     }
   }
@@ -324,7 +317,7 @@ export function MetadataAnalyzer() {
             Metadata
           </TabsTrigger>
           <TabsTrigger value="jobs" className="flex items-center gap-2">
-            <Activity className="w-4 h-4" />
+            <Pulse className="w-4 h-4" />
             Analysis Jobs
           </TabsTrigger>
           <TabsTrigger value="insights" className="flex items-center gap-2">
@@ -599,7 +592,7 @@ export function MetadataAnalyzer() {
           <Card className="quantum-field">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-accent" />
+                <Pulse className="w-5 h-5 text-accent" />
                 Analysis Jobs
               </CardTitle>
               <CardDescription>
@@ -661,7 +654,7 @@ export function MetadataAnalyzer() {
                 </div>
               ) : (
                 <div className="text-center py-12 text-muted-foreground">
-                  <Activity className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <Pulse className="w-16 h-16 mx-auto mb-4 opacity-50" />
                   <h3 className="text-lg font-semibold mb-2">No Analysis Jobs</h3>
                   <p className="text-sm">Analysis jobs will appear here when you start processing files</p>
                 </div>
