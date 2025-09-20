@@ -8,7 +8,7 @@ import {
   Brain,
   Lightning,
   TrendUp,
-  Activity,
+  Pulse,
   Database,
   Atom,
   Eye,
@@ -323,7 +323,7 @@ export function RealTimeAnalyticsDashboard() {
     switch (trend) {
       case 'up': return <TrendUp className="w-4 h-4 text-green-500" />
       case 'down': return <TrendUp className="w-4 h-4 text-red-500 rotate-180" />
-      default: return <Activity className="w-4 h-4 text-yellow-500" />
+  default: return <Pulse className="w-4 h-4 text-yellow-500" />
     }
   }
 
@@ -441,7 +441,7 @@ export function RealTimeAnalyticsDashboard() {
         <Card className="quantum-field">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-primary" />
+              <Pulse className="w-5 h-5 text-primary" />
               System Metrics
             </CardTitle>
           </CardHeader>

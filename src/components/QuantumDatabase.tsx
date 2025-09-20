@@ -9,10 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
-import { Database, MagnifyingGlass, Eye, Download, Trash, FileText, Archive, Image, Code, Activity, ChartBar, CloudArrowUp, Network, Key, Lock, Atom, ArrowClockwise } from '@phosphor-icons/react'
+import { Database, MagnifyingGlass, Eye, Download, Trash, FileText, Archive, Image, Code, Pulse, ChartBar, CloudArrowUp, Network, Key, Lock, Atom, ArrowClockwise } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 import { QuantumField } from './QuantumField'
+import { llmJSON } from '@/lib/spark'
 
 interface QuantumFile {
   id: string
@@ -219,30 +220,13 @@ export function QuantumDatabase(
     const startTime = Date.now()
 
     try {
-      const spark = (window as any).spark
-      if (!spark || typeof spark.llm !== 'function' || typeof spark.llmPrompt !== 'function') {
-        const matchingFiles = safeFiles.filter(file => 
-          file.name.toLowerCase().includes(advancedQuery.toLowerCase()) ||
-          file.vectorChain.toLowerCase().includes(advancedQuery.toLowerCase()) ||
-          (file.metadata?.tags || []).some(t => t.toLowerCase().includes(advancedQuery.toLowerCase()))
-        )
-
-        const newQuery: DatabaseQuery = {
-          id: Date.now().toString(),
-          query: advancedQuery,
-          filters: {},
-          results: matchingFiles,
-          executedAt: new Date().toISOString(),
-          executionTime: Date.now() - startTime
-        }
-
-        setQueries((current = []) => [newQuery, ...current].slice(0, 20))
-        toast.info('LLM unavailable; executed basic search instead')
-        return
+      type QueryResult = {
+        matchingFileIds?: string[]
+        explanation?: string
+        filters?: { fileType?: string; quantumState?: string; tags?: string[] }
       }
-
-      // Use LLM to process natural language query
-      const prompt = spark.llmPrompt`
+      let usedFallback = false
+      const queryResult = await llmJSON<QueryResult>((spark) => spark.llmPrompt`
       You are a quantum database query processor. Analyze this natural language query and return a JSON response with matching criteria:
       
       Query: "${advancedQuery}"
@@ -261,15 +245,16 @@ export function QuantumDatabase(
         }
       }
       
-      Base your response on the actual file data provided.`
-
-      const response = await spark.llm(prompt, 'gpt-4o', true)
-      const queryResult = JSON.parse(response)
+      Base your response on the actual file data provided.`, async () => {
+        usedFallback = true
+        return {}
+      })
 
       const matchingFiles = safeFiles.filter(file => 
-        queryResult.matchingFileIds?.includes(file.id) ||
+        (queryResult.matchingFileIds || []).includes(file.id) ||
         file.name.toLowerCase().includes(advancedQuery.toLowerCase()) ||
-        file.vectorChain.toLowerCase().includes(advancedQuery.toLowerCase())
+        file.vectorChain.toLowerCase().includes(advancedQuery.toLowerCase()) ||
+        (file.metadata?.tags || []).some(t => t.toLowerCase().includes(advancedQuery.toLowerCase()))
       )
 
       const newQuery: DatabaseQuery = {
@@ -280,14 +265,10 @@ export function QuantumDatabase(
         executedAt: new Date().toISOString(),
         executionTime: Date.now() - startTime
       }
-
       setQueries((current = []) => [newQuery, ...current].slice(0, 20))
-      
       toast.success(`Query executed: ${matchingFiles.length} files found`)
-      if (queryResult.explanation) {
-        toast.info(queryResult.explanation)
-      }
-
+      if (usedFallback) toast.info('LLM unavailable or parse failed; used basic search heuristics')
+      if (queryResult.explanation && !usedFallback) toast.info(queryResult.explanation)
     } catch {
       toast.error('Failed to execute quantum query')
     } finally {
@@ -657,7 +638,7 @@ export function QuantumDatabase(
                 </Card>
                 <Card className="quantum-field">
                   <CardContent className="p-6 text-center">
-                    <Activity className="w-8 h-8 mx-auto mb-2 text-accent quantum-pulse" />
+                    <Pulse className="w-8 h-8 mx-auto mb-2 text-accent quantum-pulse" />
                     <p className="text-2xl font-bold">{formatFileSize(analytics.totalSize)}</p>
                     <p className="text-sm text-muted-foreground">Total Size</p>
                     {onOpenInBrowser && (
@@ -744,7 +725,7 @@ export function QuantumDatabase(
               <Card className="quantum-field">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-accent" />
+                    <Pulse className="w-5 h-5 text-accent" />
                     Recent Activity
                   </CardTitle>
                 </CardHeader>
