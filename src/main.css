@@ -72,4 +72,7 @@
   --radius-xl: calc(var(--radius) * 2);
   --radius-2xl: calc(var(--radius) * 3);
   --radius-full: 9999px;
+
+  /* Base spacing unit for Tailwind v4 token function --spacing(n) */
+  --spacing: 0.25rem;
 }
