@@ -4,23 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Brain, 
-  FileText, 
-  Image, 
-  Code, 
-  Archive,
-  Activity,
-  Eye,
-  Tag,
-  Clock,
-  Hash,
-  Lightbulb,
-  ArrowRight,
-  CheckCircle,
-  XCircle,
-  Warning
-} from '@phosphor-icons/react'
+import { Brain, FileText, Image, Code, Archive, Activity, Tag, Clock, Hash, Lightbulb, CheckCircle, XCircle, Warning } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 

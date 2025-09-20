@@ -4,14 +4,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+// import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { 
   CloudArrowUp,
-  CloudArrowDown,
   Download,
   Upload,
   Database,
@@ -19,12 +18,9 @@ import {
   Network,
   ArrowClockwise,
   Shield,
-  FileArchive,
-  Code,
   CheckCircle,
   Warning,
   Info,
-  Copy,
   Share
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
@@ -71,7 +67,7 @@ export function QuantumSync() {
   const [parsedArchives] = useKV<any[]>('parsed-archives', [])
   
   const [syncEndpoints, setSyncEndpoints] = useKV<SyncEndpoint[]>('sync-endpoints', [])
-  const [backupConfigs, setBackupConfigs] = useKV<BackupConfig[]>('backup-configs', [])
+  const [_backupConfigs, _setBackupConfigs] = useKV<BackupConfig[]>('backup-configs', [])
   
   const [exportConfig, setExportConfig] = useState<ExportConfig>({
     includeFiles: true,
@@ -99,7 +95,6 @@ export function QuantumSync() {
   const safeQueries = queries || []
   const safeParsedArchives = parsedArchives || []
   const safeEndpoints = syncEndpoints || []
-  const safeBackups = backupConfigs || []
 
   // Calculate export size estimation
   const calculateExportSize = (): number => {
@@ -201,7 +196,7 @@ export function QuantumSync() {
 
       toast.success(`Database exported successfully (${formatFileSize(dataBlob.size)})`)
 
-    } catch (error) {
+    } catch {
       toast.error('Export failed')
     } finally {
       setIsExporting(false)
@@ -252,7 +247,7 @@ export function QuantumSync() {
       )
       
       toast.success('Endpoint connection successful')
-    } catch (error) {
+    } catch {
       setSyncEndpoints((current = []) =>
         current.map(endpoint =>
           endpoint.id === endpointId
@@ -282,7 +277,7 @@ export function QuantumSync() {
       )
       
       toast.success('Database synchronized successfully')
-    } catch (error) {
+    } catch {
       toast.error('Synchronization failed')
     } finally {
       setSyncing(false)

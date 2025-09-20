@@ -56,7 +56,7 @@ interface FileMetadataViewProps {
   onAnalyze?: () => void
 }
 
-export function FileMetadataView({ fileId, fileName, metadata, onAnalyze }: FileMetadataViewProps) {
+export function FileMetadataView({ fileId: _fileId, fileName: _fileName, metadata, onAnalyze }: FileMetadataViewProps) {
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.8) return 'text-green-500'
     if (confidence >= 0.6) return 'text-yellow-500'

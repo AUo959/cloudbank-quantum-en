@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -73,7 +73,7 @@ export function QuantumDatabase(
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedState, setSelectedState] = useState<string>('all')
   const [selectedType, setSelectedType] = useState<string>('all')
-  const [selectedSpace, setSelectedSpace] = useState<string>('all')
+  const [selectedSpace, _setSelectedSpace] = useState<string>('all')
   const [sortBy, setSortBy] = useState<string>('uploadedAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [pageSize, setPageSize] = useState(10)
@@ -84,7 +84,7 @@ export function QuantumDatabase(
   const [advancedQuery, setAdvancedQuery] = useState('')
   const [activeTab, setActiveTab] = useState('browser')
 
-  const safeFiles = files || []
+  const safeFiles = useMemo(() => files || [], [files])
   const safeQueries = queries || []
   const handleBulkDelete = () => {
     if (selectedFiles.length === 0) return
@@ -288,7 +288,7 @@ export function QuantumDatabase(
         toast.info(queryResult.explanation)
       }
 
-    } catch (error) {
+    } catch {
       toast.error('Failed to execute quantum query')
     } finally {
       setIsAnalyzing(false)

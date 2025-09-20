@@ -90,7 +90,9 @@ export function QuantumUploader() {
           }
           img.src = dataUrl
         })
-      } catch {}
+      } catch {
+        // ignore preview generation errors
+      }
     } else if (file.type.startsWith('video/')) {
       // Lightweight poster: seek to a small offset and capture
       try {
@@ -125,7 +127,9 @@ export function QuantumUploader() {
           video.addEventListener('error', onError, { once: true })
           setTimeout(() => { if (!done) { try { finish() } catch { onError() } } }, 1500)
         })
-      } catch {}
+      } catch {
+        // ignore preview generation errors
+      }
     } else if (file.type === 'application/pdf') {
       // Placeholder PDF thumbnail (without pdf.js)
       const text = (file.name || 'PDF').slice(0, 12)
@@ -162,7 +166,7 @@ export function QuantumUploader() {
     return quantumFile
   }
 
-  const handleFiles = async (fileList: FileList) => {
+  const handleFiles = useCallback(async (fileList: FileList) => {
     if (fileList.length === 0) return
 
     setUploading(true)
@@ -178,13 +182,13 @@ export function QuantumUploader() {
 
       setFiles((current = []) => [...current, ...newFiles])
       toast.success(`${newFiles.length} file(s) quantum processed successfully`)
-    } catch (error) {
+    } catch {
       toast.error('Quantum processing failed')
     } finally {
       setUploading(false)
       setUploadProgress(0)
     }
-  }
+  }, [setFiles])
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -204,7 +208,7 @@ export function QuantumUploader() {
     if (e.dataTransfer.files) {
       handleFiles(e.dataTransfer.files)
     }
-  }, [])
+  }, [handleFiles])
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {

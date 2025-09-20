@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { QrCode, Upload, CheckCircle, XCircle, Atom, Key } from '@phosphor-icons/react'
+import { QrCode, CheckCircle, XCircle, Key, Upload, Atom } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 
@@ -75,7 +75,7 @@ export function QuantumQRScanner() {
       setParsedData(data)
       setIsValid(true)
       toast.success('Valid quantum key QR code detected')
-    } catch (error) {
+    } catch {
       setIsValid(false)
       setParsedData(null)
       toast.error('Invalid JSON format in QR code')
@@ -124,7 +124,7 @@ export function QuantumQRScanner() {
       setIsValid(null)
       
       toast.success('Quantum key imported successfully!')
-    } catch (error) {
+    } catch {
       toast.error('Failed to import quantum key')
     } finally {
       setIsImporting(false)

@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Copy, Key, Eye, Lightning, Network, Shield, Atom, Download, QrCode, Share } from '@phosphor-icons/react'
 import { toast } from 'sonner'
@@ -112,7 +111,7 @@ export function VectorKeyManager() {
       setKeyExpiry('')
       
       toast.success(`${quantumStrength === 'quantum-secured' ? 'Quantum-secured' : 'Enhanced'} vector key generated successfully`)
-    } catch (error) {
+    } catch {
       toast.error('Failed to generate quantum vector key')
     } finally {
       setIsGenerating(false)

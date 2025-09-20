@@ -1,26 +1,11 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { 
-  FileArchive, 
-  FileText, 
-  Atom, 
-  Cube, 
-  Lightning, 
-  TreeStructure,
-  FolderOpen,
-  Code,
-  Image,
-  Archive,
-  Database,
-  CheckCircle,
-  Warning,
-  Info
-} from '@phosphor-icons/react'
+// import { Alert, AlertDescription } from '@/components/ui/alert'
+import { FileArchive, FileText, Atom, Cube, Lightning, TreeStructure, FolderOpen, Code, Image, Archive, Database } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 import { QuantumField } from './QuantumField'
@@ -75,59 +60,57 @@ export function QuantumParser() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
   const [processingStage, setProcessingStage] = useState('')
-  const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [_selectedFile, _setSelectedFile] = useState<string | null>(null)
   const [parsingStrategy, setParsingStrategy] = useState<'automatic' | 'intelligent' | 'quantum'>('intelligent')
 
   const safeFiles = files || []
   const safeArchives = parsedArchives || []
   const safeRules = parsingRules || []
 
-  // Default parsing rules
-  const defaultRules: ParsingRule[] = [
-    {
-      id: 'zip-extract',
-      name: 'ZIP Archive Extraction',
-      pattern: '*.zip',
-      fileTypes: ['application/zip'],
-      action: 'extract',
-      quantumEnhanced: true,
-      aiPowered: false
-    },
-    {
-      id: 'code-analysis',
-      name: 'Code Structure Analysis',
-      pattern: '*.{js,ts,py,java,cpp}',
-      fileTypes: ['text/javascript', 'text/typescript', 'text/x-python'],
-      action: 'analyze',
-      quantumEnhanced: true,
-      aiPowered: true
-    },
-    {
-      id: 'document-index',
-      name: 'Document Indexing',
-      pattern: '*.{txt,md,pdf,doc}',
-      fileTypes: ['text/plain', 'text/markdown', 'application/pdf'],
-      action: 'index',
-      quantumEnhanced: false,
-      aiPowered: true
-    },
-    {
-      id: 'image-metadata',
-      name: 'Image Metadata Extraction',
-      pattern: '*.{jpg,png,gif,svg}',
-      fileTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'],
-      action: 'analyze',
-      quantumEnhanced: false,
-      aiPowered: false
-    }
-  ]
-
   // Initialize default rules if none exist
   React.useEffect(() => {
+    const defaultRules: ParsingRule[] = [
+      {
+        id: 'zip-extract',
+        name: 'ZIP Archive Extraction',
+        pattern: '*.zip',
+        fileTypes: ['application/zip'],
+        action: 'extract',
+        quantumEnhanced: true,
+        aiPowered: false
+      },
+      {
+        id: 'code-analysis',
+        name: 'Code Structure Analysis',
+        pattern: '*.{js,ts,py,java,cpp}',
+        fileTypes: ['text/javascript', 'text/typescript', 'text/x-python'],
+        action: 'analyze',
+        quantumEnhanced: true,
+        aiPowered: true
+      },
+      {
+        id: 'document-index',
+        name: 'Document Indexing',
+        pattern: '*.{txt,md,pdf,doc}',
+        fileTypes: ['text/plain', 'text/markdown', 'application/pdf'],
+        action: 'index',
+        quantumEnhanced: false,
+        aiPowered: true
+      },
+      {
+        id: 'image-metadata',
+        name: 'Image Metadata Extraction',
+        pattern: '*.{jpg,png,gif,svg}',
+        fileTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'],
+        action: 'analyze',
+        quantumEnhanced: false,
+        aiPowered: false
+      }
+    ]
     if (safeRules.length === 0) {
       setParsingRules(defaultRules)
     }
-  }, [])
+  }, [safeRules.length, setParsingRules])
 
   const getFileIcon = (type: string) => {
     if (type.startsWith('image/')) return <Image className="w-4 h-4" />
@@ -207,7 +190,7 @@ export function QuantumParser() {
       }
 
       return [parsedFile]
-    } catch (error) {
+    } catch {
       // Fallback to traditional parsing
       return parseFileTraditionally(file)
     }
@@ -337,7 +320,7 @@ export function QuantumParser() {
 
       toast.success(`Successfully parsed ${allParsedFiles.length} file(s) with ${parsingStrategy} strategy`)
       
-    } catch (error) {
+    } catch {
       toast.error('Quantum parsing failed')
     } finally {
       setIsProcessing(false)
