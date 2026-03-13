@@ -1,0 +1,34 @@
+{
+  "constellation_version": "1.0.0-alpha",
+  "node": {
+    "designation": "QUANTUM-VAULT",
+    "symbolic_tag": "s.tag::quantum.vault",
+    "repo": "cloudbank-quantum-en",
+    "role": "spoke",
+    "stack": ["typescript", "react", "vite"],
+    "description": "Frontend interface — Aurora Constellation Command Interface, analyst workstation, and simulation dashboard"
+  },
+  "upstream": [
+    "s.tag::constellation.prime",
+    "s.tag::aurora.runtime"
+  ],
+  "downstream": [],
+  "governance": {
+    "charter": "Picard_Delta_3",
+    "l3_modules": ["Axiomera", "Velatrix", "Glyphon", "Caelion", "Harmion"],
+    "ethics_protocol": true
+  },
+  "contracts": {
+    "published": [],
+    "consumed": ["forecast-request", "forecast-result", "knowledge-index", "constellation-health"]
+  },
+  "health": {
+    "last_sync": null,
+    "status": "active"
+  },
+  "meta": {
+    "created": "2026-03-13T11:30:00-04:00",
+    "created_by": "Perplexity Computer",
+    "proposal_ref": "Aurora Constellation Architecture Proposal v1.0.0"
+  }
+}
