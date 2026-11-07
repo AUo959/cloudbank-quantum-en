@@ -21,7 +21,9 @@ const lockPath = resolve(root, 'package-lock.json')
 const hasFixFlag = process.argv.includes('--fix')
 
 function sha256(buf) {
-  return createHash('sha256').update(buf).digest('hex')
+  // npm rewrites indentation to match package.json. Formatting alone is not
+  // dependency drift; retain the committed formatting in check mode.
+  return createHash('sha256').update(JSON.stringify(JSON.parse(buf.toString()))).digest('hex')
 }
 
 function die(msg) {
