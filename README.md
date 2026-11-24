@@ -26,6 +26,8 @@ The Spark Template files and resources from GitHub are licensed under the terms 
 
 ## Running in Spark/Codespaces
 
+Use Node.js 20.19 or later in the 20.x series, or Node.js 22.12 or later.
+
 - Dev server binds to `0.0.0.0` on port `5000` (config in `vite.config.ts`).
 
 ```bash
