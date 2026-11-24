@@ -44,7 +44,7 @@ const generatedDirectories = new Set(['.git', '.artifacts', 'node_modules'])
 async function copyWorkspaceInputs(root, scratch, workspaces) {
   const patterns = Array.isArray(workspaces) ? workspaces : workspaces?.packages ?? []
   const prefixes = patterns.map((pattern) => pattern.replace(/^!?(\.\/)?/, '').split('/')[0])
-  const rootNames = prefixes.some((prefix) => /[*?\[\]{()}]/.test(prefix))
+  const rootNames = prefixes.some((prefix) => ['*', '?', '[', '{', '('].some((token) => prefix.includes(token)))
     ? (await readdir(root, { withFileTypes: true })).filter((entry) => entry.isDirectory()).map((entry) => entry.name)
     : prefixes
   const directories = new Set(rootNames.filter((name) => name && name !== '..' && !generatedDirectories.has(name)))
@@ -79,7 +79,7 @@ async function regenerate(root, scratch, manifest, original) {
   return JSON.parse(await readFile(join(scratch, 'package-lock.json'), 'utf8'))
 }
 
-async function previewDiff(scratch, original, updated, previewLines) {
+async function previewDiff(scratch, original, updated, previewLines = 80) {
   await Promise.all([
     writeFile(join(scratch, 'original.json'), canonicalJSON(original, 2) + '\n'),
     writeFile(join(scratch, 'updated.json'), canonicalJSON(updated, 2) + '\n'),
@@ -156,7 +156,7 @@ export async function checkLockfileDrift(options = {}) {
     const drifted = canonicalJSON(before) !== canonicalJSON(after)
     const updated = drifted ? formatLockfile(after, original) : original
     const diffPreview = drifted && options.captureDiff
-      ? await previewDiff(scratch, before, after, options.previewLines ?? 80)
+      ? await previewDiff(scratch, before, after, options.previewLines)
       : undefined
     if (drifted && options.fix) await replaceLockfile(root, packagePath, lockPath, manifest, original, updated)
     return makeReport({
