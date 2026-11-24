@@ -1,8 +1,8 @@
 import { execFile } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { copyFile, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
+import { copyFile, cp, mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { dirname, join, resolve } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
 import { promisify } from 'node:util'
 
 const run = promisify(execFile)
@@ -39,15 +39,40 @@ async function copyNpmConfig(root, scratch) {
   }
 }
 
+const generatedDirectories = new Set(['.git', '.artifacts', 'node_modules'])
+
+async function copyWorkspaceInputs(root, scratch, workspaces) {
+  const patterns = Array.isArray(workspaces) ? workspaces : workspaces?.packages ?? []
+  const prefixes = patterns.map((pattern) => pattern.replace(/^!?(\.\/)?/, '').split('/')[0])
+  const rootNames = prefixes.some((prefix) => /[*?\[\]{()}]/.test(prefix))
+    ? (await readdir(root, { withFileTypes: true })).filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+    : prefixes
+  const directories = new Set(rootNames.filter((name) => name && name !== '..' && !generatedDirectories.has(name)))
+  await Promise.all([...directories].map(async (name) => {
+    try {
+      await cp(join(root, name), join(scratch, name), {
+        recursive: true,
+        filter: (source) => !generatedDirectories.has(basename(source)),
+      })
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error
+    }
+  }))
+}
+
 async function regenerate(root, scratch, manifest, original) {
+  const { workspaces } = JSON.parse(manifest)
   await Promise.all([
     writeFile(join(scratch, 'package.json'), manifest),
     writeFile(join(scratch, 'package-lock.json'), original),
     copyNpmConfig(root, scratch),
+    copyWorkspaceInputs(root, scratch, workspaces),
   ])
-  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+  const [command, args] = process.platform === 'win32'
+    ? ['cmd.exe', ['/d', '/s', '/c', ['npm', ...npmArgs].join(' ')]]
+    : ['npm', npmArgs]
   try {
-    await run(npm, npmArgs, { cwd: scratch })
+    await run(command, args, { cwd: scratch })
   } catch (error) {
     throw new Error(`npm could not regenerate the lockfile (${error.code ?? error.signal ?? 'unknown error'}).`)
   }
@@ -90,13 +115,34 @@ async function replaceLockfile(root, packagePath, lockPath, manifest, original, 
   }
 }
 
-export async function checkLockfileDrift({
-  root = process.cwd(),
-  fix = false,
-  seed = 'EOS_SEED_ORION',
-  previewLines = 80,
-  captureDiff = false,
-} = {}) {
+function makeReport({ drifted, fix, seed, original, updated, diffPreview }) {
+  const status = drifted ? (fix ? 'fixed' : 'drift') : 'ok'
+  return {
+    version: '1.0.0',
+    anchors: ['ANCHOR: LOCKFILE_DRIFT_CHECK:T1', 'SRB:LOCKFILE_DRIFT'],
+    seed: seed ?? 'EOS_SEED_ORION',
+    timestamp: new Date().toISOString(),
+    status,
+    drifted,
+    lockPath: 'package-lock.json',
+    originalHash: sha256(original),
+    updatedHash: sha256(updated),
+    dlp: {
+      confidentiality: diffPreview ? 'internal' : 'low',
+      critical: ['package-lock.json hash'],
+      tags: ['build', 'ci', 'lockfile'],
+    },
+    notes: {
+      ok: 'The lockfile is in sync.',
+      drift: 'Run npm run lockfile:fix and review the updated lockfile.',
+      fixed: 'Review the updated lockfile before committing it.',
+    }[status],
+    ...(diffPreview === undefined ? {} : { diffPreview }),
+  }
+}
+
+export async function checkLockfileDrift(options = {}) {
+  const root = resolve(options.root ?? process.cwd())
   const packagePath = resolve(root, 'package.json')
   const lockPath = resolve(root, 'package-lock.json')
   const [manifest, original] = await Promise.all([
@@ -109,34 +155,13 @@ export async function checkLockfileDrift({
     const after = await regenerate(root, scratch, manifest, original)
     const drifted = canonicalJSON(before) !== canonicalJSON(after)
     const updated = drifted ? formatLockfile(after, original) : original
-    const diffPreview = drifted && captureDiff
-      ? await previewDiff(scratch, before, after, previewLines)
+    const diffPreview = drifted && options.captureDiff
+      ? await previewDiff(scratch, before, after, options.previewLines ?? 80)
       : undefined
-    if (drifted && fix) await replaceLockfile(root, packagePath, lockPath, manifest, original, updated)
-
-    const status = drifted ? (fix ? 'fixed' : 'drift') : 'ok'
-    return {
-      version: '1.0.0',
-      anchors: ['ANCHOR: LOCKFILE_DRIFT_CHECK:T1', 'SRB:LOCKFILE_DRIFT'],
-      seed,
-      timestamp: new Date().toISOString(),
-      status,
-      drifted,
-      lockPath: 'package-lock.json',
-      originalHash: sha256(original),
-      updatedHash: sha256(updated),
-      dlp: {
-        confidentiality: captureDiff ? 'internal' : 'low',
-        critical: ['package-lock.json hash'],
-        tags: ['build', 'ci', 'lockfile'],
-      },
-      notes: {
-        ok: 'The lockfile is in sync.',
-        drift: 'Run npm run lockfile:fix and review the updated lockfile.',
-        fixed: 'Review the updated lockfile before committing it.',
-      }[status],
-      ...(diffPreview === undefined ? {} : { diffPreview }),
-    }
+    if (drifted && options.fix) await replaceLockfile(root, packagePath, lockPath, manifest, original, updated)
+    return makeReport({
+      drifted, fix: options.fix, seed: options.seed, original, updated, diffPreview,
+    })
   } finally {
     await rm(scratch, { recursive: true, force: true })
   }

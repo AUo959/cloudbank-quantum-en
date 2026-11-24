@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
@@ -80,12 +80,39 @@ test('CLI emits one JSON report with the legacy alias and exits 2 on drift', asy
 
 test('CLI reports regeneration failures without changing the working lockfile', async (t) => {
   const { root, lockPath, packagePath, original } = await fixture(t)
-  await writeFile(packagePath, '{{invalid JSON')
+  await writeFile(packagePath, JSON.stringify({
+    name: 'fixture',
+    version: '1.0.0',
+    dependencies: { absent: 'unsupported:fixture' },
+  }))
   const result = runCli(root, '--stdout-json', '--fix')
   assert.equal(result.status, 1)
   assert.equal(result.stdout, '')
   assert.ok(result.stderr.includes('npm could not regenerate the lockfile'))
   assert.equal(await readFile(lockPath, 'utf8'), original)
+})
+
+test('regeneration preserves workspace links and leaves the workspace manifest intact', async (t) => {
+  const { root, lockPath, packagePath } = await fixture(t)
+  const workspace = join(root, 'packages', 'fixture-workspace')
+  const workspacePackage = join(workspace, 'package.json')
+  const contents = JSON.stringify({ name: 'fixture-workspace', version: '2.0.0' })
+  await mkdir(workspace, { recursive: true })
+  await writeFile(workspacePackage, contents)
+  await writeFile(packagePath, JSON.stringify({
+    name: 'fixture',
+    version: '1.0.0',
+    workspaces: { packages: ['packages/*'] },
+  }))
+
+  assert.equal((await checkLockfileDrift({ root, fix: true })).status, 'fixed')
+  const lock = JSON.parse(await readFile(lockPath, 'utf8'))
+  assert.deepEqual(lock.packages['node_modules/fixture-workspace'], {
+    resolved: 'packages/fixture-workspace',
+    link: true,
+  })
+  assert.equal(await readFile(workspacePackage, 'utf8'), contents)
+  assert.equal((await checkLockfileDrift({ root })).status, 'ok')
 })
 
 test('CLI protects the npm inputs from report output', async (t) => {
