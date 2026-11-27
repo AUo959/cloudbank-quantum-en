@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { ChangeEvent } from 'react';
+import { useRef, useState } from 'react';
+import type { ChangeEvent, Dispatch } from 'react';
 import { ArrowUpRight, FileCheck2, Info, Lock, Upload } from 'lucide-react';
 import syntheticFixture from '@/fixtures/canon-operations-synthetic.json';
 import { canonSnapshot } from '@/lib/canonOperations';
@@ -24,7 +24,7 @@ function Status({ value }: { value: CanonRecord['classification'] }) {
 function Timeline({ records, selected, onSelect }: {
   records: CanonRecord[];
   selected: string;
-  onSelect: (id: string) => void;
+  onSelect: Dispatch<string>;
 }) {
   return (
     <section className={PANEL} aria-labelledby="canon-timeline">
@@ -36,7 +36,7 @@ function Timeline({ records, selected, onSelect }: {
               type="button"
               aria-pressed={selected === item.id}
               aria-controls="canon-record"
-              onClick={() => onSelect(item.id)}
+              onClick={() => { onSelect(item.id); }}
               className={cn(FOCUS, 'w-full rounded-sm text-left grid gap-2 p-3 sm:grid-cols-[102px_minmax(0,1fr)] hover:bg-space-surface-2',
                 selected === item.id && 'bg-space-surface-2')}
             >
@@ -59,7 +59,7 @@ function Timeline({ records, selected, onSelect }: {
   );
 }
 
-function Evidence({ item, onSelect }: { item: CanonRecord; onSelect: (id: string) => void }) {
+function Evidence({ item, onSelect }: { item: CanonRecord; onSelect: Dispatch<string> }) {
   const previousId = item.previous_record_id;
   const fields = [
     ['Repository', item.source.repository], ['Commit', item.source.commit],
@@ -77,7 +77,7 @@ function Evidence({ item, onSelect }: { item: CanonRecord; onSelect: (id: string
         ))}
       </dl>
       {previousId && (
-        <button type="button" className={cn(FOCUS, 'text-sm text-teal flex items-center gap-1')} onClick={() => onSelect(previousId)}>
+        <button type="button" className={cn(FOCUS, 'text-sm text-teal flex items-center gap-1')} onClick={() => { onSelect(previousId); }}>
           View superseded record <ArrowUpRight size={13} aria-hidden />
         </button>
       )}
@@ -140,6 +140,7 @@ export function CanonOperationsView() {
   const [snapshot, setSnapshot] = useState<CanonSnapshot>(INITIAL_SNAPSHOT);
   const [selected, setSelected] = useState(INITIAL_SNAPSHOT.records[0].id);
   const [error, setError] = useState('');
+  const latestFile = useRef<File | undefined>(undefined);
 
   function showRecord(id: string) {
     setSelected(id);
@@ -152,14 +153,16 @@ export function CanonOperationsView() {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = '';
     if (!file) return;
+    latestFile.current = file;
     try {
       const parsed = canonSnapshot.parse(JSON.parse(await file.text()));
+      if (file !== latestFile.current) return;
       const records = [...parsed.records].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp) || a.id.localeCompare(b.id));
       setSnapshot({ ...parsed, records });
       setSelected(records[0].id);
       setError('');
     } catch {
-      setError('The file does not match the Canon Operations snapshot format.');
+      if (file === latestFile.current) setError('The file does not match the Canon Operations snapshot format.');
     }
   }
 
@@ -180,7 +183,7 @@ export function CanonOperationsView() {
           </div>
           <label className="relative flex items-center gap-2 rounded border border-space-border-bright px-3 py-2 text-sm font-medium text-space-text cursor-pointer hover:bg-space-surface-2 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-teal">
             <Upload size={15} aria-hidden /> Open snapshot
-            <input type="file" accept=".json,application/json" className="sr-only" onChange={loadSnapshot} />
+            <input type="file" accept=".json,application/json" className="sr-only" onChange={(event) => { void loadSnapshot(event); }} />
           </label>
         </div>
         {error && <p role="alert" className="mb-4 text-sm text-red-300">{error}</p>}
