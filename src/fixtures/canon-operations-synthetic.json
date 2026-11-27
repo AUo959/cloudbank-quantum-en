@@ -1,0 +1,148 @@
+{
+  "version": "1.0",
+  "title": "Habitat maintenance exercise",
+  "synthetic": true,
+  "records": [
+    {
+      "kind": "forecast",
+      "id": "forecast",
+      "title": "QGIA forecast",
+      "summary": "Estimated the likelihood of limited habitat downtime in a synthetic exercise.",
+      "actor": "fixture-forecaster",
+      "layer": "L1",
+      "timestamp": "2026-07-28T02:17:00Z",
+      "status": "Forecast issued",
+      "classification": "UNCONFIRMED",
+      "source": {
+        "repository": "Fixture/Evidence",
+        "commit": "8a69de8f21cebfddc1a5095bc47ae5b1b7108018",
+        "path": "forecast/package.json",
+        "sha256": "2e7baaedd35b44e88e11e424b3fb6f135c90db2ab4fa5b905db83c1657217403"
+      },
+      "receipt_sha256": "7dc33b45b41ff6a3966e2693b2618089b8f60f69ea793e10f04c18f29b61faf8",
+      "assumptions": [
+        "Power remains available"
+      ],
+      "unknowns": [
+        "Duration of sensor outage"
+      ]
+    },
+    {
+      "kind": "mediation",
+      "id": "mediation",
+      "title": "L1 mediation",
+      "summary": "Approved the baseline tier for a five-turn fixture with explicit scope limits.",
+      "actor": "fixture-reviewer",
+      "layer": "L1",
+      "timestamp": "2026-07-28T02:18:00Z",
+      "status": "Approved",
+      "classification": "STAGING",
+      "source": {
+        "repository": "Fixture/Evidence",
+        "commit": "3bbc604771f861557099b947380becbc73e60e3e",
+        "path": "mediation/decision.json",
+        "sha256": "5a8683729ac159f003b2d53e6f409f7011bfe87d0863c084d11931aed03b269f"
+      },
+      "receipt_sha256": "15a75353e7911b7695cbef9cf8bd8cd08535cac09431f6e4b284736a925a60bf"
+    },
+    {
+      "kind": "canonrec",
+      "id": "canonrec",
+      "title": "CanonRec staging",
+      "summary": "Validated the seed and its complete gate receipts. The request was accepted for local staging.",
+      "actor": "fixture-relay",
+      "layer": "L2",
+      "timestamp": "2026-07-28T02:19:00Z",
+      "status": "Accepted",
+      "classification": "STAGING",
+      "source": {
+        "repository": "Fixture/Evidence",
+        "commit": "1092b4479e6b00505c8dc7c733a8a2c2fac26313",
+        "path": "staging/bridge-receipt.json",
+        "sha256": "0101e4b0fb70fa76b5cfa626e8e5a28910a57d3d0d86dd719ef9b1ce8e81fb0e"
+      },
+      "receipt_sha256": "0101e4b0fb70fa76b5cfa626e8e5a28910a57d3d0d86dd719ef9b1ce8e81fb0e"
+    },
+    {
+      "kind": "run",
+      "id": "run",
+      "title": "GUMAS replay",
+      "summary": "Replayed five turns with an identical semantic receipt and 251 event records.",
+      "actor": "fixture-relay",
+      "layer": "L2",
+      "timestamp": "2026-07-28T02:20:00Z",
+      "status": "Replay matched",
+      "classification": "SIMULATION OUTPUT",
+      "source": {
+        "repository": "Fixture/Evidence",
+        "commit": "d6aae5822fe6473be654f6a56090e1cf7e1d8c83",
+        "path": "native/receipt.json",
+        "sha256": "617ab9af87920c3af43ed9b00bd12f9822af084f397ffdc21d3cdd75e4e84e81"
+      },
+      "receipt_sha256": "36b4d30e9ee1bfc6e8b2ef02995595296a828bd50ee81ed8449d4734745f9515"
+    },
+    {
+      "kind": "chronicle",
+      "id": "chronicle",
+      "title": "Station Chronicle",
+      "summary": "Registered the approved native run receipt and reconstructed the event from the journal.",
+      "actor": "fixture-reviewer",
+      "layer": "L2",
+      "timestamp": "2026-07-28T02:21:00Z",
+      "status": "Registered",
+      "classification": "OPERATIONAL",
+      "source": {
+        "repository": "Fixture/Evidence",
+        "commit": "e70b4152189af6e5e763a8d6c9f2578da28644b5",
+        "path": "chronicle/atom.json",
+        "sha256": "ccd2915fb843c2652f2473800c5ded5bea8ffb025c2a5dfcf971285239653869"
+      },
+      "receipt_sha256": "6fda540d99ab72a644d682349337fc0bdce3b5271e9afc7bd111cc87b2e971c7"
+    },
+    {
+      "kind": "outcome",
+      "id": "outcome",
+      "title": "Outcome and calibration",
+      "summary": "Attached the observed fixture event count and its calibration scope to the staged seed.",
+      "actor": "fixture-relay",
+      "layer": "L2",
+      "timestamp": "2026-07-28T02:22:00Z",
+      "status": "Attached",
+      "classification": "STAGING",
+      "source": {
+        "repository": "Fixture/Evidence",
+        "commit": "a620a50b601dd185f606da8df145fda79aab5f7c",
+        "path": "outcome/calibration.json",
+        "sha256": "15147bf1dd4a9712d767b7afa4385736c004420bd39dbcf418b2a9c20e13e5b8"
+      },
+      "receipt_sha256": "8a4bc9df86af178c77fb7a7f079c46cda4c07219cfbfeb341236ef7f0a4999f7"
+    },
+    {
+      "kind": "reconciliation",
+      "id": "reconciliation",
+      "title": "Reconciliation",
+      "summary": "The final gate retained the staging recommendation for the reviewed seed.",
+      "actor": "fixture-reviewer",
+      "layer": "L2",
+      "timestamp": "2026-07-28T02:23:00Z",
+      "status": "Recommendation recorded",
+      "classification": "STAGING",
+      "source": {
+        "repository": "Fixture/Evidence",
+        "commit": "8c54a99ab4c8ca0853824e5fcc185621d1616dab",
+        "path": "qgia-staging-81c9333bbc7e90fb84a4c605f949d21492b63b6cd3a8cef740152e1d5964ab6a/final_reconciliation.json",
+        "sha256": "7be2afa3dcd02187ada0729ae1763fa2bd307dd255ca3aaa8bac2d436d202197"
+      },
+      "receipt_sha256": "7be2afa3dcd02187ada0729ae1763fa2bd307dd255ca3aaa8bac2d436d202197"
+    }
+  ],
+  "branches": [
+    {
+      "name": "Approved baseline",
+      "seed": 42,
+      "turns": 5,
+      "replay": "MATCHED",
+      "receipt_sha256": "36b4d30e9ee1bfc6e8b2ef02995595296a828bd50ee81ed8449d4734745f9515"
+    }
+  ]
+}

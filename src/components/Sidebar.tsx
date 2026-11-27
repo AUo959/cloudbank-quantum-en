@@ -6,6 +6,7 @@ import {
   TrendingUp,
   BookOpen,
   Network,
+  FileCheck2,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -23,6 +24,7 @@ const NAV_ITEMS: { id: ViewId; label: string; icon: typeof MessageSquare }[] = [
   { id: 'simulation', label: 'Simulation', icon: Activity },
   { id: 'forecast', label: 'Forecast', icon: TrendingUp },
   { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
+  { id: 'canon-operations', label: 'Canon Operations', icon: FileCheck2 },
   { id: 'network', label: 'Network', icon: Network },
 ];
 
@@ -32,10 +34,10 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
   return (
     <motion.aside
       className={cn(
-        'flex flex-col h-full bg-space-surface border-r border-space-border relative z-20',
-        'transition-[width] duration-300 ease-in-out'
+        'flex flex-col h-full shrink-0 bg-space-surface border-r border-space-border relative z-20',
+        'transition-[width] duration-300 ease-in-out',
+        collapsed ? 'w-16' : 'w-16 sm:w-[220px]'
       )}
-      style={{ width: collapsed ? 64 : 220 }}
     >
       {/* Logo area */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-space-border shrink-0">
@@ -46,7 +48,7 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: 'auto' }}
               exit={{ opacity: 0, width: 0 }}
-              className="overflow-hidden whitespace-nowrap"
+              className="hidden sm:block overflow-hidden whitespace-nowrap"
             >
               <span className="text-sm font-semibold tracking-wide text-space-text">
                 AURORA
@@ -60,7 +62,7 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-3 px-2 space-y-1 overflow-y-auto overscroll-contain">
+      <nav aria-label="Workspaces" className="flex-1 py-3 px-2 space-y-1 overflow-y-auto overscroll-contain">
         {NAV_ITEMS.map((item) => {
           const isActive = activeView === item.id;
           const Icon = item.icon;
@@ -68,6 +70,8 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
             <button
               key={item.id}
               onClick={() => onViewChange(item.id)}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
               data-testid={`nav-${item.id}`}
               className={cn(
                 'w-full flex items-center gap-3 rounded-lg transition-all duration-200',
@@ -91,7 +95,7 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 'auto' }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="text-[13px] font-medium overflow-hidden whitespace-nowrap"
+                  className="hidden sm:block text-[13px] font-medium overflow-hidden whitespace-nowrap"
                   >
                     {item.label}
                   </motion.span>
@@ -110,7 +114,7 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="mb-2"
+              className="hidden sm:block mb-2"
             >
               <div className="flex items-center gap-2 px-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-status-active animate-pulse" />
@@ -124,7 +128,8 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
         <button
           onClick={() => setCollapsed(!collapsed)}
           data-testid="sidebar-toggle"
-          className="w-full flex items-center justify-center p-1.5 rounded-md text-space-text-muted hover:text-space-text hover:bg-space-surface-2 transition-colors"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="w-full hidden sm:flex items-center justify-center p-1.5 rounded-md text-space-text-muted hover:text-space-text hover:bg-space-surface-2 transition-colors"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>

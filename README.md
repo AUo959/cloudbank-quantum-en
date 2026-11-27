@@ -45,6 +45,14 @@ npm run preview
 
 Use `PREVIEW_PORT=yyyy npm run preview` to override.
 
+## Canon Operations review
+
+Choose **Canon Operations** in the workspace navigation to inspect an offline snapshot. The included synthetic habitat exercise covers the forecast, L1 approval, CanonRec staging, native GUMAS replay, Chronicle projection, calibration attachment, and reconciliation recommendation. Its pins point to the isolated evidence repository used by the synthetic fixture.
+
+Select a timeline row to view its repository, commit, source path, SHA-256, and receipt hash. **Open snapshot** loads a version `1.0` export from a local JSON file. Invalid snapshots display a validation error and the current snapshot remains available. The route displays the snapshot's evidence labels and runs in read-only mode until an authorized bridge is available.
+
+[Snapshot format](src/lib/canonOperations.ts) · [Synthetic example](src/fixtures/canon-operations-synthetic.json)
+
 ## Git Workflow Helpers
 
 - Enable local git hooks:

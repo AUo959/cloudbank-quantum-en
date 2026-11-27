@@ -6,6 +6,7 @@ import { SimulationView } from './views/SimulationView';
 import { ForecastView } from './views/ForecastView';
 import { KnowledgeView } from './views/KnowledgeView';
 import { NetworkView } from './views/NetworkView';
+import { CanonOperationsView } from './views/CanonOperationsView';
 import type { ViewId } from './lib/types';
 
 const VIEW_COMPONENTS: Record<ViewId, React.FC> = {
@@ -14,6 +15,7 @@ const VIEW_COMPONENTS: Record<ViewId, React.FC> = {
   forecast: ForecastView,
   knowledge: KnowledgeView,
   network: NetworkView,
+  'canon-operations': CanonOperationsView,
 };
 
 function App() {
