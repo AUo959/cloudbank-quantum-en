@@ -1,4 +1,4 @@
-export type ViewId = 'chat' | 'simulation' | 'forecast' | 'knowledge' | 'network';
+export type ViewId = 'chat' | 'simulation' | 'forecast' | 'knowledge' | 'network' | 'canon-operations';
 
 export interface ChatMessage {
   id: string;
